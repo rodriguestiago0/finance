@@ -1,0 +1,19 @@
+﻿version: '3.1'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: finance
+      POSTGRES_USER: finance
+      POSTGRES_DB: finance
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

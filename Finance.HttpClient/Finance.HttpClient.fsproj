@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="paket.references" />
+    <Compile Include="Nordigen\Records\Response\Authorization.fs" />
+    <Compile Include="Nordigen\Records\Response\EndUserAgreement.fs" />
+    <Compile Include="Nordigen\Records\Response\Requisition.fs" />
+    <Compile Include="Nordigen\Records\Response\Transaction.fs" />
+    <Compile Include="Nordigen\Records\Request\Requisition.fs" />
+    <Compile Include="Nordigen\Records\Request\Login.fs" />
+    <Compile Include="Nordigen\NordigenClient.fs" />
+    <Compile Include="Http.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>

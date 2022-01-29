@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Repository", "Finance.Repository\Finance.Repository.fsproj", "{8D3176AB-E1DF-4602-9B74-D6751DE50FBF}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Model", "Finance.Model\Finance.Model.fsproj", "{7FA6AFAB-BE53-4B7D-9C66-4923AE771230}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Paket", "Paket", "{B990F38D-981D-4ED8-B4B2-F61EADBDD46E}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+		.paket\paket.exe = .paket\paket.exe
+		paket.lock = paket.lock
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{7641A8D0-E84C-412E-A3E2-CACD80C2B9F5}"
+	ProjectSection(SolutionItems) = preProject
+		Docker\postgres.yaml = Docker\postgres.yaml
+	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Service", "Finance.Service\Finance.Service.fsproj", "{753EC988-2919-4773-A548-86841012C820}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.FSharp", "Finance.FSharp\Finance.FSharp.fsproj", "{BE5A3AD9-3736-4CD9-98A6-72CC6398A667}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.HttpClient", "Finance.HttpClient\Finance.HttpClient.fsproj", "{90E03B45-A12D-47D5-8973-62F77BCA7847}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8D3176AB-E1DF-4602-9B74-D6751DE50FBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D3176AB-E1DF-4602-9B74-D6751DE50FBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D3176AB-E1DF-4602-9B74-D6751DE50FBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D3176AB-E1DF-4602-9B74-D6751DE50FBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FA6AFAB-BE53-4B7D-9C66-4923AE771230}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FA6AFAB-BE53-4B7D-9C66-4923AE771230}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FA6AFAB-BE53-4B7D-9C66-4923AE771230}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FA6AFAB-BE53-4B7D-9C66-4923AE771230}.Release|Any CPU.Build.0 = Release|Any CPU
+		{753EC988-2919-4773-A548-86841012C820}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{753EC988-2919-4773-A548-86841012C820}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{753EC988-2919-4773-A548-86841012C820}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{753EC988-2919-4773-A548-86841012C820}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE5A3AD9-3736-4CD9-98A6-72CC6398A667}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE5A3AD9-3736-4CD9-98A6-72CC6398A667}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE5A3AD9-3736-4CD9-98A6-72CC6398A667}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE5A3AD9-3736-4CD9-98A6-72CC6398A667}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90E03B45-A12D-47D5-8973-62F77BCA7847}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90E03B45-A12D-47D5-8973-62F77BCA7847}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90E03B45-A12D-47D5-8973-62F77BCA7847}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90E03B45-A12D-47D5-8973-62F77BCA7847}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
