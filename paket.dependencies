@@ -8,3 +8,5 @@ group Main
     nuget Npgsql.FSharp
     nuget Fleece == 0.10.0-RC11
     nuget Fleece.SystemTextJson == 0.10.0-RC11
+    nuget Swashbuckle.AspNetCore
+    nuget Microsoft.Extensions.Hosting
