@@ -14,7 +14,7 @@ module Degiro =
         let readLines (stream : Stream) = seq {
             use sr = new StreamReader (stream)
             let _ = sr.ReadLine ()
-            while not sr.EndOfStream && not context.CancellationToken.IsCancellationRequested do
+            while not sr.EndOfStream do
                 yield sr.ReadLine ()
         }
        
@@ -26,13 +26,15 @@ module Degiro =
                 | [| date; hour; _; isin; exchange; _; IsDecimal units; IsDecimal price; _; _; _; _; _ ; IsDecimal exchangeRate; IsDecimal fee; _; _; _; externalTransactionId |] ->
                     
                     let date = DateTimeOffset.ParseExact($"{date} {hour}", "DD-MM-YYYY HH:MM", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
-                    Some(isin, exchange, (externalTransactionId |> ExternalTransactionId |> Some), date, units, price, fee, exchangeRate)
+                    Some(isin |> ISIN, exchange, (externalTransactionId |> ExternalTransactionId |> Some), date, units, price, fee, exchangeRate)
                 | _ -> None
                 
         let parseLine (line : string[]) =
             match line with
             | Transaction (isin, exchange, externalTransactionId, date, units, price, fee, exchangeRate) ->
-                let ticker = context.FetchTicker isin exchange
+                let ticker =
+                    context.FetchTicker isin exchange
+                    |> AsyncResult.ofOption (sprintf "Invalid Ticker %O %O" (deconstruct isin) exchange |> exn)
                 let mk ticker =
                     { Transaction.TransactionId = Guid.NewGuid() |> TransactionId
                       ExternalTransactionId = externalTransactionId

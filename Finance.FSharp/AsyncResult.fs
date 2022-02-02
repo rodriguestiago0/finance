@@ -81,6 +81,12 @@ module AsyncResult =
         
     let sequence xs = traverse id xs
     
+    let inline ofOption errorCase x = async {
+        match! x with
+        | Ok s -> return s |> Result.ofOption errorCase
+        | Error e -> return Result.Error e
+    }
+    
     module ComputationExpressions =
         type AsyncResultBuilder() =
             member _.Return(x) = Async.retn (Ok x)

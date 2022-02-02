@@ -18,6 +18,16 @@ module Decimal =
 
 
 [<AutoOpen>]
+module TypeIds =
+    let inline deconstruct x = (^a: (member Deconstruct: unit -> ^b) x)
+    
+    let inline deconstructOption x = x |> Option.map deconstruct
+
+    let inline idToString x = deconstruct x |> string
+
+    let inline idToStringOption x = deconstructOption x |> Option.map string
+
+[<AutoOpen>]
 module Strings =
     let join (separator: string) (strings: seq<string>) =
         String.Join(separator, strings)

@@ -1,3 +1,4 @@
 ﻿group Main
     FSharp.Core
+    FSharpPlus
     Npgsql.FSharp

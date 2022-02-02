@@ -8,10 +8,12 @@
     <Content Include=".dockerignore" />
     <Content Include="Dockerfile" />
     <Content Include="paket.references" />
+    <Compile Include="Settings.fs" />
     <Compile Include="Endpoints\Degiro.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Finance.Application\Finance.Application.fsproj" />
     <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />
     <ProjectReference Include="..\Finance.Model\Finance.Model.fsproj" />
   </ItemGroup>

@@ -6,7 +6,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="paket.references" />
+    <Compile Include="Models\Ticker.fs" />
     <Compile Include="PostgresClient.fs" />
+    <Compile Include="TransactionsRepository.fs" />
+    <Compile Include="TickersRepository.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />
+    <ProjectReference Include="..\Finance.Model\Finance.Model.fsproj" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

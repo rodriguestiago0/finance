@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Threading.Tasks
+open Finance.Application.Degiro
 open Finance.FSharp
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
@@ -10,7 +11,7 @@ open FSharp.Core
 
 [<RequireQualifiedAccess>]
 module Degiro =
-    let uploadFile (request : HttpRequest) : Task<IResult> =
+    let uploadFile (degiroContext : DegiroContext) (request : HttpRequest) : Task<IResult> =
         task{
             if not request.HasFormContentType then
                 return Results.BadRequest()
@@ -30,17 +31,20 @@ module Degiro =
                             AsyncResult.retn formFile )
                     |> Option.defaultValue ("No file found" |> exn |> AsyncResult.error)
                 
-                form
-                |> AsyncResult.bind validateForm
-                |> AsyncResult.map(fun form -> form.OpenReadStream())
-                |> ignore
-                
+                let x =
+                    form
+                    |> AsyncResult.bind validateForm
+                    |> AsyncResult.map(fun form -> form.OpenReadStream())
+                    |> AsyncResult.map (Degiro.importCSV degiroContext)
+                    |> AsyncResult.map (fun _ -> Results.Ok(None))
+                    |> AsyncResult.mapError (fun _ -> Results.BadRequest(None))
+                //TODO: fix this
                 return Results.Ok(None)
         }
 
     
-    let registerEndpoint (app : WebApplication) =
-        app.MapPost("/degiro/transaction", Func<HttpRequest , Task<IResult>>(uploadFile))
+    let registerEndpoint (app : WebApplication) (degiroContext : DegiroContext) =
+        app.MapPost("/degiro/transaction", Func<HttpRequest , Task<IResult>>(uploadFile degiroContext))
             .Accepts<IFormFile>("multipart/form-data")
             .WithName("Upload Transaction")
             .WithTags("Degiro")
