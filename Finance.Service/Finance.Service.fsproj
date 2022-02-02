@@ -10,8 +10,6 @@
     <Content Include=".dockerignore" />
     <Content Include="Dockerfile" />
     <Content Include="paket.references" />
-    <Compile Include="DegiroContext.fs" />
-    <Compile Include="DegiroService.fs" />
     <Compile Include="Worker.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

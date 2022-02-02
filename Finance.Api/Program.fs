@@ -1,7 +1,7 @@
-open System
+open Finance.Api.Endpoints
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Hosting
-open Microsoft.Extensions.DependencyInjection;
+open Microsoft.Extensions.DependencyInjection
 
 [<EntryPoint>]
 let main args =
@@ -13,7 +13,7 @@ let main args =
     
     let app = builder.Build()
 
-    app.MapGet("/", Func<string>(fun () -> "Hello World!")) |> ignore
+    Degiro.registerEndpoint app |> ignore
     
     if app.Environment.IsDevelopment() then
         app.UseSwagger() |> ignore;

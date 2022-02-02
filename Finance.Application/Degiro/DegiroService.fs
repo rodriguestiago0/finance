@@ -1,4 +1,4 @@
-﻿namespace Finance.Service
+﻿namespace Finance.Application.Degiro
 
 open System
 open System.Globalization
@@ -7,13 +7,14 @@ open Finance.FSharp
 open Finance.FSharp.AsyncResult.Operators
 open Finance.Model.Investment
 
+[<RequireQualifiedAccess>]
 module Degiro =
     let importCSV (context : DegiroContext) (stream : Stream) =
         
         let readLines (stream : Stream) = seq {
             use sr = new StreamReader (stream)
             let _ = sr.ReadLine ()
-            while not sr.EndOfStream do
+            while not sr.EndOfStream && not context.CancellationToken.IsCancellationRequested do
                 yield sr.ReadLine ()
         }
        

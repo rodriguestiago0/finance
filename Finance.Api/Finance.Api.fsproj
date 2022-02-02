@@ -5,12 +5,15 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include=".dockerignore" />
+    <Content Include="Dockerfile" />
     <Content Include="paket.references" />
+    <Compile Include="Endpoints\Degiro.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include=".dockerignore" />
-    <Content Include="Dockerfile" />
+    <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />
+    <ProjectReference Include="..\Finance.Model\Finance.Model.fsproj" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

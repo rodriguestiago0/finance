@@ -4,11 +4,10 @@ open Microsoft.Extensions.Hosting
 
 
 [<EntryPoint>]
-let main args =
+let main _ =
     async {
         let hostBuilder = Host.CreateDefaultBuilder()
         hostBuilder.ConfigureServices(fun hostContext services ->
-
             services.AddHostedService<WorkerService>() |> ignore)
         |> ignore
 
@@ -17,4 +16,5 @@ let main args =
 
         return! host.WaitForShutdownAsync() |> Async.AwaitTask
     } |> Async.RunSynchronously
+    
     0

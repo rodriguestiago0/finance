@@ -1,7 +1,5 @@
-﻿namespace Finance.Service
-
-open System
-open FSharp.Data
+﻿namespace Finance.Application.Degiro
+open System.Threading
 open Finance.FSharp
 open Finance.Model.Investment
 
@@ -10,7 +8,8 @@ type SaveTransaction = Transaction -> AsyncResult<unit, exn>
 
 type DegiroContext =
     { FetchTicker : FetchTicker
-      SaveTransaction : SaveTransaction }
+      SaveTransaction : SaveTransaction
+      CancellationToken : CancellationToken }
 with
-    static member Create() =
+    static member Create(I) =
         failwith ""

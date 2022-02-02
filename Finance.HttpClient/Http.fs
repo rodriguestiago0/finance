@@ -75,7 +75,9 @@ module Http =
             else
                 body
                 |> AsyncResult.map exn
-                |> Async.map (function | Ok e -> e :> exn |> Error | Error e -> Error e)
+                |> Async.map (function
+                    | Ok e -> e |> Error
+                      | Error e -> Error e)
 
     let inline toRequest x =
         (^T : (static member ToRequest: ^T -> Result<RequestMsg, exn>) x)
