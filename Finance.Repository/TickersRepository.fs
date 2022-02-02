@@ -15,7 +15,7 @@ module TickersRepository =
         |> Sql.query "SELECT * FROM Ticker WHERE isin = @isin and exchange = @exchange"
         |> Sql.parameters [ "isin", Sql.string isin]
         |> Sql.parameters [ "exchange", Sql.string exchange]
-        |> Sql.executeAsync (fun read ->
+        |> Sql.executeRowAsync  (fun read ->
             { TickerDto.TickerId = read.uuid "ticker_id"
               ShortId = read.string "short_id"
               TickerType = read.int "ticker_type"
@@ -23,7 +23,5 @@ module TickersRepository =
               Name = read.string "name"
               Exchange = read.string "exchange"
               Currency = read.int "currency" })
-        |> AsyncResult.ofTask
-        |> AsyncResult.map Seq.tryHead
-        |> AsyncResult.ofOption (sprintf "Ticker not found %O %O" isin exchange |> exn) 
+        |> AsyncResult.ofTask 
         |> Async.map (Result.bind TickerDto.toDomain)

@@ -13,7 +13,9 @@ type TransactionDto =
       Price : decimal
       LocalPrice : Option<decimal>
       Fee : decimal
-      ExchangeRate : Option<decimal> }
+      ExchangeRate : Option<decimal>
+      Broker : int
+      Note : Option<string> }
     
     with
         static member ofDomain (model : Transaction) : TransactionDto =
@@ -25,4 +27,6 @@ type TransactionDto =
               Price = model.Price
               LocalPrice = model.LocalPrice
               Fee = model.Fee
-              ExchangeRate = model.ExchangeRate }
+              ExchangeRate = model.ExchangeRate
+              Broker = Broker.toInt model.Broker
+              Note = model.Note }

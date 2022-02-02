@@ -7,7 +7,6 @@ open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 
-
 let configureSettings (configurationBuilder: IConfigurationBuilder) =
     configurationBuilder.SetBasePath(AppContext.BaseDirectory)
                         .AddJsonFile("appsettings.json", false)

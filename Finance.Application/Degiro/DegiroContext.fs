@@ -6,7 +6,7 @@ open Finance.Model.Investment
 open Finance.Repository
 
 type FetchTicker = ISIN -> string -> AsyncResult<Ticker, exn>
-type SaveTransactions = Transaction[] -> AsyncResult<unit, exn>
+type SaveTransactions = Transaction[] -> AsyncResult<int, exn>
 
 type DegiroContext =
     { FetchTicker : FetchTicker

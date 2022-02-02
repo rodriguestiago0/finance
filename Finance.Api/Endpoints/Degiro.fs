@@ -44,7 +44,7 @@ module Degiro =
 
     
     let registerEndpoint (app : WebApplication) (degiroContext : DegiroContext) =
-        app.MapPost("/degiro/transaction", Func<HttpRequest , Task<IResult>>(uploadFile degiroContext))
+        app.MapPost("/degiro/transaction", Func<HttpRequest,Task<IResult>>(uploadFile degiroContext))
             .Accepts<IFormFile>("multipart/form-data")
             .WithName("Upload Transaction")
             .WithTags("Degiro")

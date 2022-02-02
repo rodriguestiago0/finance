@@ -44,7 +44,9 @@ module Degiro =
                       Price = price
                       LocalPrice = None
                       Fee = fee
-                      ExchangeRate = exchangeRate }
+                      ExchangeRate = exchangeRate
+                      Broker = Broker.Degiro
+                      Note = None }
                 
                 mk
                 <!> ticker

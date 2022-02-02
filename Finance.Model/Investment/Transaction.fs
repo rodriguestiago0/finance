@@ -15,6 +15,17 @@ type ExternalTransactionId =
         member this.Deconstruct() =
             let (ExternalTransactionId id) = this
             id
+            
+type Broker =
+    | Degiro
+    with
+    static member toInt =
+        function
+        | Degiro -> 1
+    static member fromInt value =
+        match value with
+        | 1 -> Ok Degiro
+        | _ -> sprintf "Invalid Broker - %O" value |> Error 
 
 type Transaction =
     { TransactionId : TransactionId
@@ -25,4 +36,6 @@ type Transaction =
       Price : decimal
       LocalPrice : Option<decimal>
       Fee : decimal
-      ExchangeRate : Option<decimal> }
+      ExchangeRate : Option<decimal> 
+      Broker : Broker
+      Note : Option<string> }
