@@ -1,12 +1,20 @@
 ﻿namespace Finance.Model.Investment
 
+open System
 open Finance.Model
 
 type TickerId =
-    TickerId of string
+    TickerId of Guid
     with
         member this.Deconstruct() =
             let (TickerId id) = this
+            id
+            
+type ShortId =
+    ShortId of string
+    with
+        member this.Deconstruct() =
+            let (ShortId id) = this
             id
 
 type ISIN =
@@ -36,6 +44,7 @@ type TickerType =
 
 type Ticker =
     { TickerId : TickerId
+      ShortId : ShortId
       TickerType : TickerType
       ISIN : ISIN
       Name : string

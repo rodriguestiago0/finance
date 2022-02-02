@@ -15,7 +15,14 @@ module Decimal =
         match Decimal.TryParse(str) with
         | true, d -> Some d
         | _ -> None
-
+    
+    let (|IsDecimalOptional|_|) (str : string) =
+        str
+        |> Option.ofObj
+        |> Option.map(fun str -> 
+            match Decimal.TryParse(str) with
+            | true, d -> Some d
+            | _ -> None )
 
 [<AutoOpen>]
 module TypeIds =

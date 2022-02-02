@@ -2,8 +2,19 @@
 
 open System
 
-type TransactionId = TransactionId of Guid
-type ExternalTransactionId = ExternalTransactionId of string
+type TransactionId =
+    TransactionId of Guid
+    with
+        member this.Deconstruct() =
+            let (TransactionId id) = this
+            id
+            
+type ExternalTransactionId =
+    ExternalTransactionId of string
+    with
+        member this.Deconstruct() =
+            let (ExternalTransactionId id) = this
+            id
 
 type Transaction =
     { TransactionId : TransactionId
@@ -14,4 +25,4 @@ type Transaction =
       Price : decimal
       LocalPrice : Option<decimal>
       Fee : decimal
-      ExchangeRate : decimal }
+      ExchangeRate : Option<decimal> }

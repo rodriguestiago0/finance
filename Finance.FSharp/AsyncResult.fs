@@ -87,6 +87,12 @@ module AsyncResult =
         | Error e -> return Result.Error e
     }
     
+    let teeError (f: 'b -> unit) (res: AsyncResult<'a, 'b>) : AsyncResult<'a,'b> =
+        res |> Async.map (Result.teeError f)
+        
+    let tee (f: 'a -> unit) (res: AsyncResult<'a, _>) =
+        res |> Async.map (Result.tee f)
+        
     module ComputationExpressions =
         type AsyncResultBuilder() =
             member _.Return(x) = Async.retn (Ok x)

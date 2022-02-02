@@ -18,3 +18,15 @@ module Result =
         match x with
         | Some s -> Result.Ok s
         | None -> Result.Error errorCase
+        
+    let tee (f: 'a->unit) (res: Result<'a, _>) : Result<'a, _> =
+        match res with
+        | Ok x -> f x
+        | Error _ -> ()
+        res
+        
+    let teeError (f: 'b->unit) (res: Result<'a, 'b>) : Result<'a, 'b> =
+        match res with
+        | Ok _ -> ()
+        | Error e -> f e
+        res

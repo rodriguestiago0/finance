@@ -23,7 +23,7 @@ module Degiro =
                 None
             else
                 match parts with
-                | [| date; hour; _; isin; exchange; _; IsDecimal units; IsDecimal price; _; _; _; _; _ ; IsDecimal exchangeRate; IsDecimal fee; _; _; _; externalTransactionId |] ->
+                | [| date; hour; _; isin; exchange; _; IsDecimal units; IsDecimal price; _; _; _; _; _ ; IsDecimalOptional exchangeRate; IsDecimal fee; _; _; _; externalTransactionId |] ->
                     
                     let date = DateTimeOffset.ParseExact($"{date} {hour}", "DD-MM-YYYY HH:MM", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
                     Some(isin |> ISIN, exchange, (externalTransactionId |> ExternalTransactionId |> Some), date, units, price, fee, exchangeRate)
@@ -34,7 +34,7 @@ module Degiro =
             | Transaction (isin, exchange, externalTransactionId, date, units, price, fee, exchangeRate) ->
                 let ticker =
                     context.FetchTicker isin exchange
-                    |> AsyncResult.ofOption (sprintf "Invalid Ticker %O %O" (deconstruct isin) exchange |> exn)
+                    
                 let mk ticker =
                     { Transaction.TransactionId = Guid.NewGuid() |> TransactionId
                       ExternalTransactionId = externalTransactionId
@@ -48,7 +48,6 @@ module Degiro =
                 
                 mk
                 <!> ticker
-                |> AsyncResult.bind context.SaveTransaction
             | _ -> "Invalid line" |> exn |> AsyncResult.error
         
         let x =
@@ -56,5 +55,6 @@ module Degiro =
             |> Seq.map (split ",")
             |> Seq.map parseLine
             |> AsyncResult.sequence
-        
+            |> AsyncResult.bind (Array.ofSeq >> context.SaveTransactions)
+            
         failwith ""

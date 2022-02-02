@@ -7,7 +7,7 @@
   <ItemGroup>
     <Content Include="paket.references" />
     <Compile Include="Models\Ticker.fs" />
-    <Compile Include="PostgresClient.fs" />
+    <Compile Include="Models\Transaction.fs" />
     <Compile Include="TransactionsRepository.fs" />
     <Compile Include="TickersRepository.fs" />
   </ItemGroup>

@@ -5,23 +5,20 @@ open Finance.FSharp
 open Finance.Model.Investment
 open Finance.Repository
 
-type FetchTicker = ISIN -> string -> AsyncResult<Option<Ticker>, exn>
-type SaveTransaction = Transaction -> AsyncResult<unit, exn>
+type FetchTicker = ISIN -> string -> AsyncResult<Ticker, exn>
+type SaveTransactions = Transaction[] -> AsyncResult<unit, exn>
 
 type DegiroContext =
     { FetchTicker : FetchTicker
-      SaveTransaction : SaveTransaction }
+      SaveTransactions : SaveTransactions }
 with
     static member Create sqlConnectionString =
-        let sql =
-            sqlConnectionString
-            |> Sql.connect
             
         let fetchTicker =
-            TickersRepository.getByISINAndExchange sql
+            TickersRepository.getByISINAndExchange sqlConnectionString
             
-        let saveTransaction =
-            TransactionsRepository.create sql
+        let saveTransactions =
+            TransactionsRepository.createTransactions sqlConnectionString 
                         
         { FetchTicker = fetchTicker
-          SaveTransaction = saveTransaction }
+          SaveTransactions = saveTransactions }
