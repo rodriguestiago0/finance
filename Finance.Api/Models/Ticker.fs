@@ -1,14 +1,14 @@
-﻿namespace Finance.Repository.Models
+﻿namespace Finance.Api.Models
 
 open System
 open FSharpPlus
 open Finance.FSharp
 open Finance.Model
 open Finance.Model.Investment
+open Microsoft.FSharp.Core
 
 type TickerDto =
-    { TickerId : int
-      ExternalTickerId : Guid
+    { TickerId : Guid
       ShortId : string
       TickerType : int
       ISIN : string
@@ -21,8 +21,8 @@ type TickerDto =
             let tickerType = TickerType.fromInt dto.TickerType
             let currency = Currency.fromInt dto.Currency
             let mk tickerType currency = 
-                { Ticker.TickerId = dto.TickerId |> TickerId
-                  ExternalTickerId = dto.ExternalTickerId |> ExternalTickerId
+                { Ticker.TickerId = TickerId.empty
+                  ExternalTickerId = dto.TickerId |> ExternalTickerId
                   ShortId = dto.ShortId |> ShortId
                   TickerType = tickerType
                   ISIN = dto.ISIN |> ISIN
@@ -32,13 +32,12 @@ type TickerDto =
             mk
             <!> tickerType
             <*> currency
-            
-        static member ofDomain (domain : Ticker) :  TickerDto =
-            { TickerDto.TickerId = deconstruct domain.TickerId
-              ExternalTickerId = deconstruct domain.ExternalTickerId
+        
+        static member ofDomain (domain : Ticker) : TickerDto =
+            { TickerDto.TickerId = deconstruct domain.ExternalTickerId
               ShortId = deconstruct domain.ShortId
               TickerType = TickerType.toInt domain.TickerType
               ISIN = deconstruct domain.ISIN
               Name = domain.Name
               Exchange = domain.Exchange
-              Currency = Currency.toInt domain.Currency }            
+              Currency = Currency.toInt domain.Currency }

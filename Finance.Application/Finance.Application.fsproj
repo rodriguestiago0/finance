@@ -8,6 +8,8 @@
     <Content Include="paket.references" />
     <Compile Include="Degiro\DegiroContext.fs" />
     <Compile Include="Degiro\DegiroService.fs" />
+    <Compile Include="Ticker\TickerContext.fs" />
+    <Compile Include="Broker\BrokerContext.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />

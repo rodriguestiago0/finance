@@ -3,33 +3,29 @@
 open System
 
 type TransactionId =
-    TransactionId of Guid
+    TransactionId of int
     with
         member this.Deconstruct() =
             let (TransactionId id) = this
             id
             
+        static member empty =
+            0 |> TransactionId
+          
 type ExternalTransactionId =
-    ExternalTransactionId of string
+    ExternalTransactionId of Guid
     with
         member this.Deconstruct() =
             let (ExternalTransactionId id) = this
             id
             
-type Broker =
-    | Degiro
-    with
-    static member toInt =
-        function
-        | Degiro -> 1
-    static member fromInt value =
-        match value with
-        | 1 -> Ok Degiro
-        | _ -> sprintf "Invalid Broker - %O" value |> Error 
+        static member newExternalTransactionId =
+            Guid.NewGuid() |> ExternalTransactionId
 
 type Transaction =
     { TransactionId : TransactionId
-      ExternalTransactionId : Option<ExternalTransactionId>
+      ExternalTransactionId : ExternalTransactionId
+      BrokerTransactionId : Option<string>
       Ticker : Ticker
       Date : DateTimeOffset
       Units : decimal

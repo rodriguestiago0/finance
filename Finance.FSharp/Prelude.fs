@@ -10,6 +10,13 @@ module Guid =
         | _ -> None
 
 [<AutoOpen>]
+module Prelude =
+    let konst x _ = x
+
+    let nullable (x: 't)    
+        = Nullable<'t>(x)
+
+[<AutoOpen>]
 module Decimal =
     let (|IsDecimal|_|) (str : string) =
         match Decimal.TryParse(str) with

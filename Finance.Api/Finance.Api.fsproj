@@ -9,7 +9,13 @@
     <Content Include="Dockerfile" />
     <Content Include="paket.references" />
     <Compile Include="Settings.fs" />
-    <Compile Include="Endpoints\Degiro.fs" />
+    <Compile Include="Helpers\IResult.fs" />
+    <Compile Include="Models\Transaction.fs" />
+    <Compile Include="Models\Ticker.fs" />
+    <Compile Include="Models\Broker.fs" />
+    <Compile Include="Endpoints\DegiroEndpoints.fs" />
+    <Compile Include="Endpoints\TickerEndpoints.fs" />
+    <Compile Include="Endpoints\BrokerEndpoints.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

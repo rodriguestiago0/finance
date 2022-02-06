@@ -1,8 +1,8 @@
 ﻿namespace Finance.Api.Endpoints
 
 open System
-open System.IO
 open System.Threading.Tasks
+open Finance.Api.Helpers
 open Finance.Application.Degiro
 open Finance.FSharp
 open Microsoft.AspNetCore.Builder
@@ -11,7 +11,7 @@ open FSharp.Core
 
 [<RequireQualifiedAccess>]
 module Degiro =
-    let uploadFile (degiroContext : DegiroContext) (request : HttpRequest) : Task<IResult> =
+    let private uploadFile (degiroContext : DegiroContext) (request : HttpRequest) : Task<IResult> =
         task{
             if not request.HasFormContentType then
                 return Results.BadRequest()
@@ -31,15 +31,14 @@ module Degiro =
                             AsyncResult.retn formFile )
                     |> Option.defaultValue ("No file found" |> exn |> AsyncResult.error)
                 
-                let x =
+                return!
                     form
                     |> AsyncResult.bind validateForm
                     |> AsyncResult.map(fun form -> form.OpenReadStream())
                     |> AsyncResult.map (Degiro.importCSV degiroContext)
-                    |> AsyncResult.map (fun _ -> Results.Ok(None))
-                    |> AsyncResult.mapError (fun _ -> Results.BadRequest(None))
-                //TODO: fix this
-                return Results.Ok(None)
+                    |> AsyncResult.map (fun _ -> Results.Ok())
+                    |> AsyncResult.mapError (fun _ -> Results.BadRequest())
+                    |> IResults.ofAsyncResult
         }
 
     

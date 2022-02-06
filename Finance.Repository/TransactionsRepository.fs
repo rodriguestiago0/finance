@@ -14,8 +14,9 @@ module TransactionsRepository =
                     transactions
                     |> Array.map TransactionDto.ofDomain
                     |> Array.map (fun transaction ->
-                            [ "@TransactionId", Sql.uuid transaction.TransactionId 
-                              "@ExternalTransactionId", Sql.stringOrNone transaction.ExternalTransactionId 
+                            [ "@TransactionId", Sql.int transaction.TransactionId 
+                              "@ExternalTransactionId", Sql.uuid transaction.ExternalTransactionId 
+                              "@BrokerTransactionId", Sql.stringOrNone transaction.BrokerTransactionId 
                               "@TickerId", Sql.uuid transaction.TickerId 
                               "@Date", Sql.timestamptz transaction.Date 
                               "@Units", Sql.decimal transaction.Units 
@@ -32,8 +33,8 @@ module TransactionsRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.executeTransactionAsync [ "INSERT INTO
-                            Transaction (TransactionId, ExternalTransactionId, TickerId, Date, Units, Price, LocalPrice, Fee, ExchangeRate, Broker, Note)
-                            VALUES (@TransactionId, @ExternalTransactionId, @TickerId, @Date, @Units, @Price, @LocalPrice, @Fee, @ExchangeRate, @Broker, @Note)", data]
+                            Transaction (transaction_id, external_transaction_id, broker_transaction_id, ticker_id, date, units, price, local_price, fee, exchange_rate, broker, note)
+                            VALUES (@TransactionId, @ExternalTransactionId, @BrokerTransactionId, @TickerId, @Date, @Units, @Price, @LocalPrice, @Fee, @ExchangeRate, @Broker, @Note)", data]
                     |> Async.AwaitTask
                 return Ok (List.sum result)
             with ex ->

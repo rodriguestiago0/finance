@@ -26,18 +26,22 @@ module Degiro =
                 | [| date; hour; _; isin; exchange; _; IsDecimal units; IsDecimal price; _; _; _; _; _ ; IsDecimalOptional exchangeRate; IsDecimal fee; _; _; _; externalTransactionId |] ->
                     
                     let date = DateTimeOffset.ParseExact($"{date} {hour}", "DD-MM-YYYY HH:MM", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
-                    Some(isin |> ISIN, exchange, (externalTransactionId |> ExternalTransactionId |> Some), date, units, price, fee, exchangeRate)
+                    Some(isin |> ISIN, exchange, (externalTransactionId |> Some), date, units, price, fee, exchangeRate)
                 | _ -> None
                 
         let parseLine (line : string[]) =
             match line with
-            | Transaction (isin, exchange, externalTransactionId, date, units, price, fee, exchangeRate) ->
+            | Transaction (isin, exchange, brokerTransactionId, date, units, price, fee, exchangeRate) ->
                 let ticker =
                     context.FetchTicker isin exchange
                     
-                let mk ticker =
-                    { Transaction.TransactionId = Guid.NewGuid() |> TransactionId
-                      ExternalTransactionId = externalTransactionId
+                let broker =
+                    context.FetchBroker "Degiro"
+                    
+                let mk ticker broker =
+                    { Transaction.TransactionId = TransactionId.empty
+                      ExternalTransactionId = ExternalTransactionId.newExternalTransactionId
+                      BrokerTransactionId = brokerTransactionId
                       Ticker = ticker
                       Date = date
                       Units = units
@@ -45,11 +49,12 @@ module Degiro =
                       LocalPrice = None
                       Fee = fee
                       ExchangeRate = exchangeRate
-                      Broker = Broker.Degiro
+                      Broker = broker
                       Note = None }
                 
                 mk
                 <!> ticker
+                <*> broker
             | _ -> "Invalid line" |> exn |> AsyncResult.error
         
         let x =

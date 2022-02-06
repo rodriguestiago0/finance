@@ -1,7 +1,9 @@
 open System
 open Finance.Api.Endpoints
 open Finance.Api.Settings
+open Finance.Application.Broker
 open Finance.Application.Degiro
+open Finance.Application.Ticker
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Configuration
@@ -18,6 +20,8 @@ let main args =
     let settings = configurationBuilder.Build().Get<Settings>()
     
     let degiroContext = DegiroContext.Create settings.SqlConnectionString
+    let tickerContext = TickerContext.Create settings.SqlConnectionString
+    let brokerContext = BrokerContext.Create settings.SqlConnectionString
     let services = builder.Services
     
     services.AddEndpointsApiExplorer() |> ignore
@@ -26,12 +30,18 @@ let main args =
     let app = builder.Build()
 
     Degiro.registerEndpoint app degiroContext |> ignore
+    Ticker.registerEndpoint app tickerContext |> ignore
+    Broker.registerEndpoint app brokerContext |> ignore
     
     if app.Environment.IsDevelopment() then
         app.UseSwagger() |> ignore;
         app.UseSwaggerUI() |> ignore;
     
     app.UseHttpsRedirection() |> ignore;
+    
+    Console.WriteLine($"Application Name: {builder.Environment.ApplicationName}");
+    Console.WriteLine($"Environment Name: {builder.Environment.EnvironmentName}");
+    Console.WriteLine($"ContentRoot Path: {builder.Environment.ContentRootPath}");
     
     app.Run()
 

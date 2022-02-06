@@ -1,12 +1,11 @@
-﻿namespace Finance.Repository.Models
+﻿namespace Finance.Api.Models
 
 open System
 open Finance.FSharp
 open Finance.Model.Investment
 
 type TransactionDto =
-    { TransactionId : int
-      ExternalTransactionId : Guid
+    { TransactionId : Guid
       BrokerTransactionId : Option<string>
       TickerId : Guid
       Date : DateTimeOffset
@@ -15,13 +14,12 @@ type TransactionDto =
       LocalPrice : Option<decimal>
       Fee : decimal
       ExchangeRate : Option<decimal>
-      Broker : int
+      BrokerId : Guid
       Note : Option<string> }
     
     with
         static member ofDomain (model : Transaction) : TransactionDto =
-            { TransactionDto.TransactionId = deconstruct model.TransactionId
-              ExternalTransactionId = deconstruct model.ExternalTransactionId
+            { TransactionDto.TransactionId = deconstruct model.ExternalTransactionId
               BrokerTransactionId = model.BrokerTransactionId 
               TickerId = deconstruct model.Ticker.ExternalTickerId
               Date = model.Date
@@ -30,5 +28,5 @@ type TransactionDto =
               LocalPrice = model.LocalPrice
               Fee = model.Fee
               ExchangeRate = model.ExchangeRate
-              Broker = failwith ""//Broker.toInt model.Broker
+              BrokerId = deconstruct model.Broker.ExternalBrokerId
               Note = model.Note }

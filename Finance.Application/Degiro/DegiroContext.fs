@@ -1,15 +1,16 @@
 ﻿namespace Finance.Application.Degiro
 
-open Npgsql.FSharp
 open Finance.FSharp
 open Finance.Model.Investment
 open Finance.Repository
 
 type FetchTicker = ISIN -> string -> AsyncResult<Ticker, exn>
+type FetchBroker =  string -> AsyncResult<Broker, exn>
 type SaveTransactions = Transaction[] -> AsyncResult<int, exn>
 
 type DegiroContext =
     { FetchTicker : FetchTicker
+      FetchBroker : FetchBroker
       SaveTransactions : SaveTransactions }
 with
     static member Create sqlConnectionString =
@@ -17,8 +18,12 @@ with
         let fetchTicker =
             TickersRepository.getByISINAndExchange sqlConnectionString
             
+        let fetchBroker =
+           BrokersRepository.getByName sqlConnectionString
+            
         let saveTransactions =
             TransactionsRepository.createTransactions sqlConnectionString 
-                        
+                                
         { FetchTicker = fetchTicker
+          FetchBroker = fetchBroker
           SaveTransactions = saveTransactions }
