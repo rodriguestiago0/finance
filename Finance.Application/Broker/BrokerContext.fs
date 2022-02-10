@@ -8,7 +8,7 @@ open Finance.Repository
 type FetchBrokers = unit -> AsyncResult<List<Broker>, exn>
 type FetchBrokerByExternalId = ExternalBrokerId -> AsyncResult<Broker, exn>
 type FetchBrokerByName = string -> AsyncResult<Broker, exn>
-type SaveBroker = Broker -> AsyncResult<int, exn>
+type SaveBroker = Broker -> AsyncResult<Broker, exn>
 
 type BrokerContext =
     { FetchBrokers : FetchBrokers

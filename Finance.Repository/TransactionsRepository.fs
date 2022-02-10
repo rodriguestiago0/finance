@@ -7,13 +7,13 @@ open Finance.Model.Investment
 open Finance.Repository.Models
 
 module TransactionsRepository =
-    let createTransactions connectionString (transactions : Transaction[]) =
+    let createTransactions connectionString (transactions : seq<Transaction>) =
         async {
             try
                 let data =
                     transactions
-                    |> Array.map TransactionDto.ofDomain
-                    |> Array.map (fun transaction ->
+                    |> Seq.map TransactionDto.ofDomain
+                    |> Seq.map (fun transaction ->
                             [ "@TransactionId", Sql.int transaction.TransactionId 
                               "@ExternalTransactionId", Sql.uuid transaction.ExternalTransactionId 
                               "@BrokerTransactionId", Sql.stringOrNone transaction.BrokerTransactionId 
@@ -27,14 +27,15 @@ module TransactionsRepository =
                               "@Broker", Sql.int transaction.Broker
                               "@Note", Sql.stringOrNone transaction.Note ]
                         )
-                    |> List.ofArray
+                    |> List.ofSeq
                 
                 let! result =
                     connectionString
                     |> Sql.connect
                     |> Sql.executeTransactionAsync [ "INSERT INTO
                             Transaction (transaction_id, external_transaction_id, broker_transaction_id, ticker_id, date, units, price, local_price, fee, exchange_rate, broker, note)
-                            VALUES (@TransactionId, @ExternalTransactionId, @BrokerTransactionId, @TickerId, @Date, @Units, @Price, @LocalPrice, @Fee, @ExchangeRate, @Broker, @Note)", data]
+                            VALUES (@TransactionId, @ExternalTransactionId, @BrokerTransactionId, @TickerId, @Date, @Units, @Price, @LocalPrice, @Fee, @ExchangeRate, @Broker, @Note) 
+                            RETURNING *", data]
                     |> Async.AwaitTask
                 return Ok (List.sum result)
             with ex ->

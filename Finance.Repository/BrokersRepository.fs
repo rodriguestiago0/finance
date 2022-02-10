@@ -1,6 +1,5 @@
 ﻿namespace Finance.Repository
 
-open System
 open FSharpPlus
 open Finance.FSharp
 open Microsoft.FSharp.Core
@@ -37,29 +36,29 @@ module BrokersRepository =
         |> Sql.connect
         |> Sql.query "SELECT * FROM broker WHERE external_broker_id = @BrokerExternalId"
         |> Sql.parameters [ "@BrokerExternalId", Sql.uuid (deconstruct externalId)]
-        |> Sql.executeRow mapToDto
-        //|> AsyncResult.ofTask
-        |> AsyncResult.retn
+        |> Sql.executeRowAsync mapToDto
+        |> AsyncResult.ofTask
         |> AsyncResult.map BrokerDto.toDomain
     
-    let createBroker connectionString (broker : Broker) =
+    let createBroker connectionString (broker : Broker) : AsyncResult<Broker, exn> =
         async {
             try                    
                 let brokerDto =
                     broker
                     |> BrokerDto.ofDomain
                 
-                let! result =
+                return!
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
                             broker (external_broker_id, name)
-                            VALUES (@ExternalBrokerId, @Name)"
+                            VALUES (@ExternalBrokerId, @Name)
+                            RETURNING *"
                     |> Sql.parameters [ ("@ExternalBrokerId", Sql.uuid brokerDto.ExternalBrokerId)
                                         ("@Name", Sql.string brokerDto.Name) ]
-                    |> Sql.executeNonQueryAsync
-                    |> Async.AwaitTask
-                return Ok (result)
+                    |> Sql.executeRowAsync mapToDto
+                    |> AsyncResult.ofTask
+                    |> AsyncResult.map BrokerDto.toDomain
             with ex ->
                 return Error ex
         }

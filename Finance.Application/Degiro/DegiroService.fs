@@ -11,7 +11,6 @@ open Finance.Model.Investment
 [<RequireQualifiedAccess>]
 module Degiro =
     let importCSV (context : DegiroContext) (externalBrokerId : Guid) (stream : Stream) =
-        
         let readLines (stream : Stream) = seq {
             use sr = new StreamReader (stream)
             let _ = sr.ReadLine ()
@@ -72,3 +71,4 @@ module Degiro =
         
         linesBroker
         |> AsyncResult.bind parser
+        |> AsyncResult.bind context.SaveTransactions

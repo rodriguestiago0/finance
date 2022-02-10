@@ -6,7 +6,7 @@ open Finance.Repository
 
 type FetchTickers = unit -> AsyncResult<List<Ticker>, exn>
 type FetchTickerByExternalId = ExternalTickerId -> AsyncResult<Ticker, exn>
-type SaveTicker = Ticker -> AsyncResult<int, exn>
+type SaveTicker = Ticker -> AsyncResult<Ticker, exn>
 
 type TickerContext =
     { FetchTickers : FetchTickers

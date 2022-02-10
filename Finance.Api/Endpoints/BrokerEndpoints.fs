@@ -16,18 +16,14 @@ open Finance.Model.Investment
 module Broker =
     let private createBroker (brokerContext : BrokerContext) (brokerDto : BrokerDto) =
         task{
-            let newExternalId = ExternalBrokerId.newExternalBrokerId
-            let ticker =
-                BrokerDto.toDomain brokerDto
-                |> AsyncResult.retn
-                |> AsyncResult.map (fun t -> { t with ExternalBrokerId = newExternalId})
+            let ticker = BrokerDto.toDomain brokerDto
             
+            let buildUri (broker : Broker) =
+                sprintf "/brokers/%O" (idToString broker.ExternalBrokerId)
+                
             return! 
-                ticker
-                |> AsyncResult.bind brokerContext.SaveBroker
-                |> AsyncResult.map(fun n -> Results.Ok(n))
-                |> AsyncResult.mapError(fun e -> Results.BadRequest(e))
-                |> IResults.ofAsyncResult
+                brokerContext.SaveBroker ticker
+                |> IResults.created buildUri
         }
     
     let private getBrokers (brokerContext : BrokerContext) _ =
@@ -35,23 +31,19 @@ module Broker =
             return! 
                 brokerContext.FetchBrokers()
                 |> AsyncResult.map (List.map BrokerDto.ofDomain)
-                |> AsyncResult.map(fun n -> Results.Ok(n))
-                |> AsyncResult.mapError(fun e -> Results.BadRequest(e))
-                |> IResults.ofAsyncResult
+                |> IResults.ok
         }
         
     let private getBroker (brokerContext : BrokerContext) (id : Guid) =
-        task{
+        task{                
             return!
                 ExternalBrokerId id
                 |> brokerContext.FetchBrokerByExternalId 
                 |> AsyncResult.map BrokerDto.ofDomain
-                |> AsyncResult.map(fun n -> Results.Ok(n))
-                |> AsyncResult.mapError(fun e -> Results.BadRequest(e))
-                |> IResults.ofAsyncResult
+                |> IResults.ok
         }
         
-    let private uploadFile (degiroContext : DegiroContext) (id : Guid) (request : HttpRequest) : Task<IResult> =
+    let private uploadFile (degiroContext : DegiroContext) (externalBrokerId : Guid) (request : HttpRequest) : Task<IResult> =
         task{
             if not request.HasFormContentType then
                 return Results.BadRequest()
@@ -75,10 +67,8 @@ module Broker =
                     form
                     |> AsyncResult.bind validateForm
                     |> AsyncResult.map(fun form -> form.OpenReadStream())
-                    |> AsyncResult.map (Degiro.importCSV degiroContext Guid.Empty)
-                    |> AsyncResult.map (fun _ -> Results.Ok())
-                    |> AsyncResult.mapError (fun _ -> Results.BadRequest())
-                    |> IResults.ofAsyncResult
+                    |> AsyncResult.map (Degiro.importCSV degiroContext externalBrokerId)
+                    |> IResults.ok
         }
     
     let registerEndpoint (app : WebApplication) (brokerContext : BrokerContext) (degiroContext : DegiroContext) =
@@ -89,7 +79,7 @@ module Broker =
             .WithTags("Brokers") |> ignore
         app.MapGet("/brokers/{id}", Func<Guid, Task<IResult>> (fun (id :Guid) -> getBroker brokerContext id))
             .WithTags("Brokers") |> ignore
-        app.MapPost("/brokers/{id}/transactions", Func<Guid, HttpRequest,Task<IResult>>(uploadFile degiroContext))
+        app.MapPost("/brokers/{id}/transactions", Func<Guid, HttpRequest,Task<IResult>>(fun id request -> uploadFile degiroContext id request))
             .Accepts<IFormFile>("multipart/form-data")
             .WithName("Upload Transaction")
             .WithTags("Brokers")

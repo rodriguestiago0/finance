@@ -15,41 +15,34 @@ open Finance.Model.Investment
 module Ticker =
     let private createTicker (tickerContext : TickerContext) (tickerDto : TickerDto) =
         task{
-            let newExternalId = ExternalTickerId.newExternalTickerId
             let ticker =
                 TickerDto.toDomain tickerDto
-                |> Result.map (fun t -> { t with ExternalTickerId = newExternalId})
                 |> Async.retn
             
+            let buildUri (ticker : Ticker) =
+                sprintf "/tickers/%O" (idToString ticker.ExternalTickerId)
+                
             return! 
                 ticker
                 |> AsyncResult.bind tickerContext.SaveTicker
-                |> AsyncResult.map(fun n -> Results.Ok(n))
-                |> AsyncResult.mapError(fun e -> Results.BadRequest(e))
-                |> IResults.ofAsyncResult
+                |> IResults.created buildUri
         }
         
     let private getTickers (tickerContext : TickerContext) _ =
         task{
-            
             return! 
                 tickerContext.FetchTickers()
                 |> AsyncResult.map (List.map TickerDto.ofDomain)
-                |> AsyncResult.map(fun n -> Results.Ok(n))
-                |> AsyncResult.mapError(fun e -> Results.BadRequest(e))
-                |> IResults.ofAsyncResult
+                |> IResults.ok
         }
         
     let private getByExternalId (tickerContext : TickerContext) (externalId : Guid) =
         task{
-            
             return!
                 ExternalTickerId externalId
                 |> tickerContext.FetchTickerByExternalId
                 |> AsyncResult.map TickerDto.ofDomain
-                |> AsyncResult.map(fun n -> Results.Ok(n))
-                |> AsyncResult.mapError(fun e -> Results.BadRequest(e))
-                |> IResults.ofAsyncResult
+                |> IResults.ok
         }
         
     let registerEndpoint (app : WebApplication) (tickerContext : TickerContext) =

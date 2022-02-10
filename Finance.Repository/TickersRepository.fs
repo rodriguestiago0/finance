@@ -50,19 +50,20 @@ module TickersRepository =
         |> AsyncResult.ofTask 
         |> Async.map (Result.bind TickerDto.toDomain)
     
-    let createTicker connectionString (ticker : Ticker) =
+    let createTicker connectionString (ticker : Ticker) : AsyncResult<Ticker, exn> =
         async {
             try
                 let tickerDto =
                     ticker
                     |> TickerDto.ofDomain
                 
-                let! result =
+                return!
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
                             ticker (external_ticker_id, short_id, ticker_type, isin, name, exchange, currency)
-                            VALUES (@externalTickerId, @shortId, @tickerType, @isin, @name, @exchange, @currency)"
+                            VALUES (@externalTickerId, @shortId, @tickerType, @isin, @name, @exchange, @currency)
+                            RETURNING *"
                     |> Sql.parameters [ ("@externalTickerId", Sql.uuid tickerDto.ExternalTickerId)
                                         ("@shortId", Sql.string tickerDto.ShortId) 
                                         ("@tickerType", Sql.int tickerDto.TickerType) 
@@ -70,9 +71,9 @@ module TickersRepository =
                                         ("@name", Sql.string tickerDto.Name) 
                                         ("@exchange", Sql.string tickerDto.Exchange)
                                         ("@currency", Sql.int tickerDto.Currency) ]
-                    |> Sql.executeNonQueryAsync
-                    |> Async.AwaitTask
-                return Ok (result)
+                    |> Sql.executeRowAsync mapToDto
+                    |> AsyncResult.ofTask
+                    |> Async.map (Result.bind TickerDto.toDomain)
             with ex ->
                 return Error ex
         }
