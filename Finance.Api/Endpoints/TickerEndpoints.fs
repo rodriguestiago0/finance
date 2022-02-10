@@ -19,12 +19,13 @@ module Ticker =
                 TickerDto.toDomain tickerDto
                 |> Async.retn
             
-            let buildUri (ticker : Ticker) =
-                sprintf "/tickers/%O" (idToString ticker.ExternalTickerId)
+            let buildUri (ticker : TickerDto) =
+                sprintf "/tickers/%O" ticker.TickerId
                 
             return! 
                 ticker
                 |> AsyncResult.bind tickerContext.SaveTicker
+                |> AsyncResult.map TickerDto.ofDomain
                 |> IResults.created buildUri
         }
         

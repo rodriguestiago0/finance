@@ -5,8 +5,8 @@ create table if not exists transaction
             primary key,
     external_transaction_id uuid                     not null,
     broker_transaction_id   varchar,
-    ticker_id               integer                  not null,
-        constraint transaction_broker_ticker_id_fk
+    ticker_id               integer                  not null
+        constraint transaction_ticker_ticker_id_fk
             references ticker
             on delete cascade,
     date                    timestamp with time zone not null,
@@ -27,6 +27,7 @@ create unique index if not exists transaction_broker_transaction_id_broker_uinde
 
 create unique index if not exists transaction_external_transaction_id_uindex
     on transaction (external_transaction_id);
+
 
 d);
 

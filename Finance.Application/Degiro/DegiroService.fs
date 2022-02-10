@@ -29,24 +29,26 @@ module Degiro =
                     Some(isin |> ISIN, exchange, (externalTransactionId |> Some), date, units, price, fee, exchangeRate)
                 | _ -> None
                 
-        let parseLine broker (line : string[]) =
+        let parseLine (broker : Broker) (line : string[]) =
             match line with
             | Transaction (isin, exchange, brokerTransactionId, date, units, price, fee, exchangeRate) ->
                 let ticker =
                     context.FetchTicker isin exchange
                     
-                let mk ticker =
+                let mk (ticker : Ticker) =
                     { Transaction.TransactionId = TransactionId.empty
                       ExternalTransactionId = ExternalTransactionId.newExternalTransactionId
                       BrokerTransactionId = brokerTransactionId
-                      Ticker = ticker
+                      TickerId = ticker.TickerId
+                      ExternalTickerId = ticker.ExternalTickerId
                       Date = date
                       Units = units
                       Price = price
                       LocalPrice = None
                       Fee = fee
                       ExchangeRate = exchangeRate
-                      Broker = broker
+                      BrokerId = broker.BrokerId
+                      ExternalBrokerId = broker.ExternalBrokerId
                       Note = None }
                 
                 mk

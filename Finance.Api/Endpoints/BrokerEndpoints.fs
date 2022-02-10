@@ -18,11 +18,12 @@ module Broker =
         task{
             let ticker = BrokerDto.toDomain brokerDto
             
-            let buildUri (broker : Broker) =
-                sprintf "/brokers/%O" (idToString broker.ExternalBrokerId)
+            let buildUri (broker : BrokerDto) =
+                sprintf "/brokers/%O" broker.BrokerId
                 
             return! 
                 brokerContext.SaveBroker ticker
+                |> AsyncResult.map BrokerDto.ofDomain 
                 |> IResults.created buildUri
         }
     
@@ -40,6 +41,14 @@ module Broker =
                 ExternalBrokerId id
                 |> brokerContext.FetchBrokerByExternalId 
                 |> AsyncResult.map BrokerDto.ofDomain
+                |> IResults.ok
+        }
+        
+    let private getTransactionByExternalBrokerId (brokerContext : BrokerContext) (externalBrokerId : Guid) =
+        task{
+            return! 
+                brokerContext.FetchTransactionByExternalBrokerId (externalBrokerId |> ExternalBrokerId)
+                |> AsyncResult.map (List.map TransactionDto.ofDomain)
                 |> IResults.ok
         }
         
@@ -81,5 +90,7 @@ module Broker =
             .WithTags("Brokers") |> ignore
         app.MapPost("/brokers/{id}/transactions", Func<Guid, HttpRequest,Task<IResult>>(fun id request -> uploadFile degiroContext id request))
             .Accepts<IFormFile>("multipart/form-data")
-            .WithName("Upload Transaction")
+            .WithTags("Brokers") |> ignore
+        app.MapGet("/brokers/{id}/transactions", Func<Guid,Task<IResult>>(fun id -> getTransactionByExternalBrokerId brokerContext id))
+            .Accepts<IFormFile>("multipart/form-data")
             .WithTags("Brokers")

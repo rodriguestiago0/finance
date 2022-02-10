@@ -26,12 +26,14 @@ type Transaction =
     { TransactionId : TransactionId
       ExternalTransactionId : ExternalTransactionId
       BrokerTransactionId : Option<string>
-      Ticker : Ticker
+      TickerId : TickerId
+      ExternalTickerId : ExternalTickerId
       Date : DateTimeOffset
       Units : decimal
       Price : decimal
       LocalPrice : Option<decimal>
       Fee : decimal
       ExchangeRate : Option<decimal> 
-      Broker : Broker
+      BrokerId : BrokerId
+      ExternalBrokerId : ExternalBrokerId
       Note : Option<string> }
