@@ -29,9 +29,8 @@ let main args =
     
     let app = builder.Build()
 
-    Degiro.registerEndpoint app degiroContext |> ignore
     Ticker.registerEndpoint app tickerContext |> ignore
-    Broker.registerEndpoint app brokerContext |> ignore
+    Broker.registerEndpoint app brokerContext degiroContext |> ignore
     
     if app.Environment.IsDevelopment() then
         app.UseSwagger() |> ignore;

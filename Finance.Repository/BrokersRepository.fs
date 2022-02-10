@@ -35,10 +35,11 @@ module BrokersRepository =
     let getByExternalId connectionString (externalId : ExternalBrokerId) : AsyncResult<Broker, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM broker WHERE broker_external_id = @BrokerExternalId"
+        |> Sql.query "SELECT * FROM broker WHERE external_broker_id = @BrokerExternalId"
         |> Sql.parameters [ "@BrokerExternalId", Sql.uuid (deconstruct externalId)]
-        |> Sql.executeRowAsync mapToDto
-        |> AsyncResult.ofTask 
+        |> Sql.executeRow mapToDto
+        //|> AsyncResult.ofTask
+        |> AsyncResult.retn
         |> AsyncResult.map BrokerDto.toDomain
     
     let createBroker connectionString (broker : Broker) =

@@ -3,13 +3,14 @@
 open System
 open System.Globalization
 open System.IO
+open FSharpPlus
 open Finance.FSharp
 open Finance.FSharp.AsyncResult.Operators
 open Finance.Model.Investment
 
 [<RequireQualifiedAccess>]
 module Degiro =
-    let importCSV (context : DegiroContext) (stream : Stream) =
+    let importCSV (context : DegiroContext) (externalBrokerId : Guid) (stream : Stream) =
         
         let readLines (stream : Stream) = seq {
             use sr = new StreamReader (stream)
@@ -29,16 +30,13 @@ module Degiro =
                     Some(isin |> ISIN, exchange, (externalTransactionId |> Some), date, units, price, fee, exchangeRate)
                 | _ -> None
                 
-        let parseLine (line : string[]) =
+        let parseLine broker (line : string[]) =
             match line with
             | Transaction (isin, exchange, brokerTransactionId, date, units, price, fee, exchangeRate) ->
                 let ticker =
                     context.FetchTicker isin exchange
                     
-                let broker =
-                    context.FetchBroker "Degiro"
-                    
-                let mk ticker broker =
+                let mk ticker =
                     { Transaction.TransactionId = TransactionId.empty
                       ExternalTransactionId = ExternalTransactionId.newExternalTransactionId
                       BrokerTransactionId = brokerTransactionId
@@ -54,14 +52,23 @@ module Degiro =
                 
                 mk
                 <!> ticker
-                <*> broker
             | _ -> "Invalid line" |> exn |> AsyncResult.error
         
-        let x =
+        
+        let parser (broker, lines)  =
+            lines
+            |> Seq.map (parseLine broker)
+            |> AsyncResult.sequence
+        
+        let broker =
+           context.FetchBroker (externalBrokerId |> ExternalBrokerId)
+        
+        let lines =
             readLines stream
             |> Seq.map (split ",")
-            |> Seq.map parseLine
-            |> AsyncResult.sequence
-            |> AsyncResult.bind (Array.ofSeq >> context.SaveTransactions)
+            |> AsyncResult.retn
             
-        failwith ""
+        let linesBroker = AsyncResult.lift2 tuple2 broker lines
+        
+        linesBroker
+        |> AsyncResult.bind parser
