@@ -27,7 +27,5 @@ create unique index if not exists transaction_broker_transaction_id_broker_uinde
 
 create unique index if not exists transaction_external_transaction_id_uindex
     on transaction (external_transaction_id);
-
-
-d);
+);
 

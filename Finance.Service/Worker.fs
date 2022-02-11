@@ -5,6 +5,7 @@ open System.Threading
 open System.Threading.Tasks
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
+open Finance.Application.Transaction
 
 type WorkerService(_logger: ILogger<WorkerService>) =
     member val timer: Timer option = None with get, set
@@ -17,7 +18,7 @@ type WorkerService(_logger: ILogger<WorkerService>) =
             this.cancellationToken <- Some cancellationToken
             Task.CompletedTask
 
-        member this.StopAsync(cancellationToken: CancellationToken) =
+        member this.StopAsync(_ : CancellationToken) =
             "Worker Service is stopping" |> _logger.LogInformation
             match this.timer with
             | Some(t) -> t.Change(Timeout.Infinite, 0) |> ignore
@@ -30,5 +31,5 @@ type WorkerService(_logger: ILogger<WorkerService>) =
             | Some(t) -> t.Dispose()
             | None -> ()
 
-    member this.DoWork(state: Object) =
+    member this.DoWork(context : Object) =
         "Worker Service is working." |> _logger.LogInformation

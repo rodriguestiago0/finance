@@ -8,7 +8,6 @@ open Finance.Model.Investment
 open Finance.Repository.Models
 
 module BrokersRepository =
-    
     let mapToDto (read : RowReader) =
         { BrokerDto.BrokerId = read.int "broker_id"
           ExternalBrokerId = read.uuid "external_broker_id"

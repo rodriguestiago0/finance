@@ -63,4 +63,5 @@ type Ticker =
       ISIN : ISIN
       Name : string
       Exchange : string
-      Currency : Currency }
+      Currency : Currency
+      TaxationRequired : bool }

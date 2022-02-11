@@ -1,6 +1,5 @@
 ﻿namespace Finance.Repository
 
-open System
 open FSharpPlus
 open Finance.FSharp
 open Microsoft.FSharp.Core
@@ -9,7 +8,6 @@ open Finance.Model.Investment
 open Finance.Repository.Models
 
 module TickersRepository =
-    
     let mapToDto (read : RowReader) =
         { TickerDto.TickerId = read.int "ticker_id"
           ExternalTickerId = read.uuid "external_ticker_id"
@@ -18,12 +16,23 @@ module TickersRepository =
           ISIN = read.string "isin"
           Name = read.string "name"
           Exchange = read.string "exchange"
-          Currency = read.int "currency" }
+          Currency = read.int "currency"
+          TaxationRequired = read.bool "taxation_required" }
     
     let getAll connectionString : AsyncResult<List<Ticker>, exn> =
         connectionString
         |> Sql.connect
         |> Sql.query "SELECT * FROM ticker"
+        |> Sql.executeAsync mapToDto
+        |> AsyncResult.ofTask 
+        |> AsyncResult.map (List.map TickerDto.toDomain >> Result.sequence)
+        |> Async.map Result.flatten
+        |> AsyncResult.map List.ofSeq
+        
+    let getTaxableTickers connectionString : AsyncResult<List<Ticker>, exn> =
+        connectionString
+        |> Sql.connect
+        |> Sql.query "SELECT * FROM ticker where taxation_required = true"
         |> Sql.executeAsync mapToDto
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map TickerDto.toDomain >> Result.sequence)
@@ -61,8 +70,8 @@ module TickersRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
-                            ticker (external_ticker_id, short_id, ticker_type, isin, name, exchange, currency)
-                            VALUES (@externalTickerId, @shortId, @tickerType, @isin, @name, @exchange, @currency)
+                            ticker (external_ticker_id, short_id, ticker_type, isin, name, exchange, currency, taxation_required)
+                            VALUES (@externalTickerId, @shortId, @tickerType, @isin, @name, @exchange, @currency, @taxationRequired)
                             RETURNING *"
                     |> Sql.parameters [ ("@externalTickerId", Sql.uuid tickerDto.ExternalTickerId)
                                         ("@shortId", Sql.string tickerDto.ShortId) 
@@ -70,7 +79,8 @@ module TickersRepository =
                                         ("@isin", Sql.string tickerDto.ISIN) 
                                         ("@name", Sql.string tickerDto.Name) 
                                         ("@exchange", Sql.string tickerDto.Exchange)
-                                        ("@currency", Sql.int tickerDto.Currency) ]
+                                        ("@currency", Sql.int tickerDto.Currency)
+                                        ("@taxationRequired", Sql.bool tickerDto.TaxationRequired) ]
                     |> Sql.executeRowAsync mapToDto
                     |> AsyncResult.ofTask
                     |> Async.map (Result.bind TickerDto.toDomain)

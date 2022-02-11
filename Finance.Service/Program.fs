@@ -2,7 +2,6 @@ open Finance.Service
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 
-
 [<EntryPoint>]
 let main _ =
     async {

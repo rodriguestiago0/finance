@@ -9,7 +9,8 @@ create table if not exists ticker
     name               varchar not null,
     isin               varchar not null,
     exchange           varchar not null,
-    currency           integer not null
+    currency           integer not null,
+    taxation_required  boolean not null
 );
 
 create unique index if not exists ticker_external_ticker_id_uindex

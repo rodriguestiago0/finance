@@ -10,6 +10,8 @@
     <Compile Include="Degiro\DegiroService.fs" />
     <Compile Include="Ticker\TickerContext.fs" />
     <Compile Include="Broker\BrokerContext.fs" />
+    <Compile Include="Transaction\TransactionContext.fs" />
+    <Compile Include="Transaction\TransactionService.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />

@@ -51,5 +51,5 @@ module Ticker =
             .WithTags("Tickers") |> ignore
         app.MapGet("/tickers", Func<Task<IResult>>(getTickers tickerContext))
             .WithTags("Tickers") |> ignore
-        app.MapGet("/tickers/{id}", Func<Guid, Task<IResult>>(fun id -> getTickers tickerContext id))
+        app.MapGet("/tickers/{id}", Func<Guid, Task<IResult>>(fun id -> getByExternalId tickerContext id))
             .WithTags("Tickers")

@@ -4,6 +4,7 @@ open Finance.FSharp
 open Finance.Model.Investment
 open Finance.Repository
 
+
 type FetchBrokers = unit -> AsyncResult<List<Broker>, exn>
 type FetchBrokerByExternalId = ExternalBrokerId -> AsyncResult<Broker, exn>
 type FetchBrokerByName = string -> AsyncResult<Broker, exn>

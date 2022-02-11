@@ -88,7 +88,7 @@ module Broker =
             .WithTags("Brokers") |> ignore
         app.MapGet("/brokers/{id}", Func<Guid, Task<IResult>> (fun (id :Guid) -> getBroker brokerContext id))
             .WithTags("Brokers") |> ignore
-        app.MapPost("/brokers/{id}/transactions", Func<Guid, HttpRequest,Task<IResult>>(fun id request -> uploadFile degiroContext id request))
+        app.MapPost("/brokers/{id}/transactions", Func<_, _, _> (fun id request -> uploadFile degiroContext id request))
             .Accepts<IFormFile>("multipart/form-data")
             .WithTags("Brokers") |> ignore
         app.MapGet("/brokers/{id}/transactions", Func<Guid,Task<IResult>>(fun id -> getTransactionByExternalBrokerId brokerContext id))

@@ -7,7 +7,6 @@ open Finance.Model.Investment
 open Finance.Repository.Models
 
 module TransactionsRepository =
-    
     let mapToDto (read : RowReader) =
         ({ TransactionDto.TransactionId = read.int "transaction_id"
            ExternalTransactionId = read.uuid "external_transaction_id"
@@ -25,11 +24,23 @@ module TransactionsRepository =
     let getByBrokerExternalId connectionString (externalBrokerId : ExternalBrokerId) : AsyncResult<List<Transaction>, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT t.*, b.external_broker_id, t.external_ticker_id FROM transaction t
+        |> Sql.query "SELECT t.*, b.external_broker_id, ti.external_ticker_id FROM transaction t
                       INNER JOIN broker b on b.broker_id = t.broker_id
                       INNER JOIN ticker ti on ti.ticker_id = t.ticker_id
                       WHERE b.external_broker_id = @externalBrokerId"
         |> Sql.parameters [ "@externalBrokerId", Sql.uuid (deconstruct externalBrokerId) ]
+        |> Sql.executeAsync mapToDto
+        |> AsyncResult.ofTask 
+        |> AsyncResult.map (List.map TransactionDto.toDomain)
+        
+    let getByTickerId connectionString (tickerId : TickerId) : AsyncResult<List<Transaction>, exn> =
+        connectionString
+        |> Sql.connect
+        |> Sql.query "SELECT t.*, b.external_broker_id, ti.external_ticker_id FROM transaction t
+                      INNER JOIN broker b on b.broker_id = t.broker_id
+                      INNER JOIN ticker ti on ti.ticker_id = t.ticker_id
+                      WHERE b.ticker_id = @tickerId"
+        |> Sql.parameters [ "@tickerId", Sql.int (deconstruct tickerId) ]
         |> Sql.executeAsync mapToDto
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map TransactionDto.toDomain)
