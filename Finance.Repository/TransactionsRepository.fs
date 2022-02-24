@@ -17,10 +17,10 @@ module TransactionsRepository =
            Price = read.decimal "price"
            LocalPrice = read.decimalOrNone "local_price"
            Fee = read.decimalOrNone "fee"
-           ExchangeRate = read.decimalOrNone "exchange_ate"
+           ExchangeRate = read.decimalOrNone "exchange_rate"
            BrokerId = read.int "broker_id"
            Note = read.stringOrNone "note" }, read.uuid "external_broker_id", read.uuid "external_ticker_id")
-    
+
     let getByBrokerExternalId connectionString (externalBrokerId : ExternalBrokerId) : AsyncResult<List<Transaction>, exn> =
         connectionString
         |> Sql.connect
