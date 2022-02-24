@@ -1,4 +1,4 @@
-create table if not exists ticker
+create table ticker
 (
     ticker_id          serial
         constraint ticker_pk
@@ -13,9 +13,12 @@ create table if not exists ticker
     taxation_required  boolean not null
 );
 
-create unique index if not exists ticker_external_ticker_id_uindex
+create unique index ticker_external_ticker_id_uindex
     on ticker (external_ticker_id);
 
-create unique index if not exists ticker_ticker_id_uindex
+create unique index ticker_ticker_id_uindex
+    on ticker (ticker_id);
+
+ exists ticker_ticker_id_uindex
     on ticker (ticker_id);
 

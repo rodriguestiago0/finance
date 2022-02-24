@@ -16,7 +16,7 @@ module TransactionsRepository =
            Units = read.decimal "units"
            Price = read.decimal "price"
            LocalPrice = read.decimalOrNone "local_price"
-           Fee = read.decimal "fee"
+           Fee = read.decimalOrNone "fee"
            ExchangeRate = read.decimalOrNone "exchange_ate"
            BrokerId = read.int "broker_id"
            Note = read.stringOrNone "note" }, read.uuid "external_broker_id", read.uuid "external_ticker_id")
@@ -52,15 +52,14 @@ module TransactionsRepository =
                     transactions
                     |> Seq.map TransactionDto.ofDomain
                     |> Seq.map (fun transaction ->
-                            [ "@TransactionId", Sql.int transaction.TransactionId 
-                              "@ExternalTransactionId", Sql.uuid transaction.ExternalTransactionId 
+                            [ "@ExternalTransactionId", Sql.uuid transaction.ExternalTransactionId
                               "@BrokerTransactionId", Sql.stringOrNone transaction.BrokerTransactionId 
                               "@TickerId", Sql.int transaction.TickerId 
                               "@Date", Sql.timestamptz transaction.Date 
                               "@Units", Sql.decimal transaction.Units 
                               "@Price", Sql.decimal transaction.Price 
                               "@LocalPrice", Sql.decimalOrNone transaction.LocalPrice 
-                              "@Fee", Sql.decimal transaction.Fee 
+                              "@Fee", Sql.decimalOrNone transaction.Fee
                               "@ExchangeRate", Sql.decimalOrNone transaction.ExchangeRate
                               "@BrokerId", Sql.int transaction.BrokerId
                               "@Note", Sql.stringOrNone transaction.Note ]
@@ -71,8 +70,8 @@ module TransactionsRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.executeTransactionAsync [ "INSERT INTO
-                            Transaction (transaction_id, external_transaction_id, broker_transaction_id, ticker_id, date, units, price, local_price, fee, exchange_rate, broker_id, note)
-                            VALUES (@TransactionId, @ExternalTransactionId, @BrokerTransactionId, @TickerId, @Date, @Units, @Price, @LocalPrice, @Fee, @ExchangeRate, @BrokerId, @Note) 
+                            Transaction (external_transaction_id, broker_transaction_id, ticker_id, date, units, price, local_price, fee, exchange_rate, broker_id, note)
+                            VALUES (@ExternalTransactionId, @BrokerTransactionId, @TickerId, @Date, @Units, @Price, @LocalPrice, @Fee, @ExchangeRate, @BrokerId, @Note)
                             RETURNING *", data]
                     |> Async.AwaitTask
                 return Ok (List.sum result)

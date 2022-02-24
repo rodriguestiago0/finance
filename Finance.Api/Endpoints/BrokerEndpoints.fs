@@ -56,27 +56,38 @@ module Broker =
         task{
             if not request.HasFormContentType then
                 return Results.BadRequest()
-            else                                            
+            else
                 let form =
                     request.ReadFormAsync()
                     |> AsyncResult.ofTask
-                    |> AsyncResult.map (fun formCollection -> formCollection.Files["File"])
-                
-                let validateForm (form : IFormFile) =
-                    form
-                    |> Option.ofObj
-                    |> Option.map(fun formFile ->
-                        if formFile.Length = 0 then
+                    |> AsyncResult.bind (fun formCollection ->
+                        match formCollection.Files.Count with
+                        | 1 -> Ok formCollection.Files
+                        | _ -> sprintf "No Files Found" |> exn |> Error
+                        |> Async.retn)
+
+                let validateForms (forms : IFormFileCollection) =
+                    let validateForm (form : IFormFile) =
+                        if form.Length = 0 then
                             "Empty file" |> exn |> AsyncResult.error
                         else
-                            AsyncResult.retn formFile )
-                    |> Option.defaultValue ("No file found" |> exn |> AsyncResult.error)
-                
+                            AsyncResult.retn form
+
+                    forms
+                    |> Seq.map validateForm
+                    |> AsyncResult.sequence
+
+                let processForms (forms : seq<IFormFile>) =
+                    forms
+                    |> Seq.map(fun form ->
+                        form.OpenReadStream()
+                        |> Degiro.importCSV degiroContext externalBrokerId)
+                    |> AsyncResult.sequence
+
                 return!
                     form
-                    |> AsyncResult.bind validateForm
-                    |> AsyncResult.map(fun form -> form.OpenReadStream())
-                    |> AsyncResult.map (Degiro.importCSV degiroContext externalBrokerId)
+                    |> AsyncResult.bind validateForms
+                    |> AsyncResult.bind processForms
                     |> IResults.ok
         }
     
@@ -92,5 +103,4 @@ module Broker =
             .Accepts<IFormFile>("multipart/form-data")
             .WithTags("Brokers") |> ignore
         app.MapGet("/brokers/{id}/transactions", Func<Guid,Task<IResult>>(fun id -> getTransactionByExternalBrokerId brokerContext id))
-            .Accepts<IFormFile>("multipart/form-data")
             .WithTags("Brokers")

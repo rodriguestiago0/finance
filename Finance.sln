@@ -7,7 +7,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Paket", "Paket", "{B990F38D-981D-4ED8-B4B2-F61EADBDD46E}"
 	ProjectSection(SolutionItems) = preProject
 		paket.dependencies = paket.dependencies
-		.paket\paket.exe = .paket\paket.exe
 		paket.lock = paket.lock
 	EndProjectSection
 EndProject

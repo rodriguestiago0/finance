@@ -17,21 +17,6 @@ module Prelude =
         = Nullable<'t>(x)
 
 [<AutoOpen>]
-module Decimal =
-    let (|IsDecimal|_|) (str : string) =
-        match Decimal.TryParse(str) with
-        | true, d -> Some d
-        | _ -> None
-    
-    let (|IsDecimalOptional|_|) (str : string) =
-        str
-        |> Option.ofObj
-        |> Option.map(fun str -> 
-            match Decimal.TryParse(str) with
-            | true, d -> Some d
-            | _ -> None )
-
-[<AutoOpen>]
 module TypeIds =
     let inline deconstruct x = (^a: (member Deconstruct: unit -> ^b) x)
     
@@ -59,6 +44,33 @@ module Strings =
         
     let isNullOrEmpty (s: string) =
         String.IsNullOrEmpty(s)
+
+    let (|IsNotNullOrEmpty|_|) (str : string) =
+        if isNullOrEmpty str then
+            None
+        else Some str
+
+[<AutoOpen>]
+module Decimal =
+    let (|IsDecimal|_|) (str : string) =
+        match Decimal.TryParse(str) with
+        | true, d -> Some d
+        | _ -> None
+
+    let (|IsDecimalOptional|_|) (str : string) =
+        match str with
+        | IsNotNullOrEmpty str ->
+            match Decimal.TryParse(str) with
+            | true, d -> Some (Some d)
+            | _ -> None
+        | _ -> Some None
+
+    let addOptional (dO1 : Option<decimal>) (dO2 : Option<decimal>) =
+        match dO1, dO2 with
+        | Some d1, Some d2 -> Some (d1+d2)
+        | Some d1, None -> Some d1
+        | None, Some d2 -> Some d2
+        | _ -> None
 
 [<AutoOpen>]
 module DateTimes =

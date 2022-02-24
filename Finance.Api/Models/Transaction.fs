@@ -12,7 +12,7 @@ type TransactionDto =
       Units : decimal
       Price : decimal
       LocalPrice : Option<decimal>
-      Fee : decimal
+      Fee : Option<decimal>
       ExchangeRate : Option<decimal>
       BrokerId : Guid
       Note : Option<string> }

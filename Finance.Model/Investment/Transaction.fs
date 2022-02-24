@@ -32,7 +32,7 @@ type Transaction =
       Units : decimal
       Price : decimal
       LocalPrice : Option<decimal>
-      Fee : decimal
+      Fee : Option<decimal>
       ExchangeRate : Option<decimal> 
       BrokerId : BrokerId
       ExternalBrokerId : ExternalBrokerId
