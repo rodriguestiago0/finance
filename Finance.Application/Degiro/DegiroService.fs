@@ -19,6 +19,7 @@ module Degiro =
           Date : DateTimeOffset
           Units : decimal
           Price : decimal
+          LocalPrice : Option<decimal>
           Fee : Option<decimal>
           ExchangeRate : Option<decimal> }
 
@@ -38,12 +39,16 @@ module Degiro =
                 | [| date; hour; _; isin; exchange; _; IsDecimal units; IsDecimal price; _; _; _; _; _ ; IsDecimalOptional exchangeRate; IsDecimalOptional fee; _; _; _; brokerTransactionId |] ->
                     
                     let date = DateTimeOffset.ParseExact($"{date} {hour}", "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
+                    let localPrice =
+                        exchangeRate
+                        |> Option.map (fun exchangeRate -> price/exchangeRate)
                     { DegiroTransaction.ISIN = isin |> ISIN
                       Exchange = exchange
                       BrokerTransactionId = brokerTransactionId
                       Date = date
                       Units = units
                       Price = price
+                      LocalPrice = localPrice
                       Fee = fee
                       ExchangeRate = exchangeRate }
                     |> Some
@@ -69,7 +74,7 @@ module Degiro =
                   Date = transaction.Date
                   Units = transaction.Units
                   Price = transaction.Price
-                  LocalPrice = None
+                  LocalPrice = transaction.LocalPrice
                   Fee = transaction.Fee
                   ExchangeRate = transaction.ExchangeRate
                   BrokerId = broker.BrokerId
