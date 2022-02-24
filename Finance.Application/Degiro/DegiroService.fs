@@ -4,7 +4,6 @@ open System
 open System.Globalization
 open System.IO
 open FSharpPlus
-open FSharpPlus.Lens
 open Finance.Application.Degiro
 open Finance.FSharp
 open Finance.FSharp.AsyncResult.Operators
@@ -54,7 +53,7 @@ module Degiro =
                     |> Some
                 | _ -> None
                 
-        let parseLine (broker : Broker) (line : string[]) =
+        let parseLine (line : string[]) =
             match line with
             | Transaction t ->
                 t |> AsyncResult.retn
@@ -87,7 +86,7 @@ module Degiro =
         let groupByExternalTransactionId (transactions : seq<DegiroTransaction>) =
             transactions
             |> Seq.groupBy(fun t -> t.BrokerTransactionId)
-            |> Seq.map(fun (transactionId, transactions) ->
+            |> Seq.map(fun (_, transactions) ->
                 let mergeTransactions (t1 : DegiroTransaction) (t2 : DegiroTransaction) =
                     { t1 with
                         Units = t1.Units + t2.Units
@@ -108,7 +107,7 @@ module Degiro =
                 |> AsyncResult.sequence
 
             lines
-            |> Seq.map (parseLine broker)
+            |> Seq.map parseLine
             |> AsyncResult.sequence
             |> AsyncResult.map groupByExternalTransactionId
             |> AsyncResult.bind parseDegiroTransaction
