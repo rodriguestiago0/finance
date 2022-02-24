@@ -32,6 +32,7 @@ module TransactionsRepository =
         |> Sql.executeAsync mapToDto
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map TransactionDto.toDomain)
+        |> AsyncResult.mapError handleExceptions
         
     let getByTickerId connectionString (tickerId : TickerId) : AsyncResult<List<Transaction>, exn> =
         connectionString
@@ -44,6 +45,7 @@ module TransactionsRepository =
         |> Sql.executeAsync mapToDto
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map TransactionDto.toDomain)
+        |> AsyncResult.mapError handleExceptions
         
     let createTransactions connectionString (transactions : seq<Transaction>) =
         async {
@@ -78,3 +80,4 @@ module TransactionsRepository =
             with ex ->
                 return Error ex
         }
+        |> AsyncResult.mapError handleExceptions

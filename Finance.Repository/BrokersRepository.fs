@@ -29,6 +29,7 @@ module BrokersRepository =
         |> Sql.executeRowAsync mapToDto
         |> AsyncResult.ofTask 
         |> AsyncResult.map BrokerDto.toDomain
+        |> AsyncResult.mapError handleExceptions
         
     let getByExternalId connectionString (externalId : ExternalBrokerId) : AsyncResult<Broker, exn> =
         connectionString
@@ -38,6 +39,7 @@ module BrokersRepository =
         |> Sql.executeRowAsync mapToDto
         |> AsyncResult.ofTask
         |> AsyncResult.map BrokerDto.toDomain
+        |> AsyncResult.mapError handleExceptions
     
     let createBroker connectionString (broker : Broker) : AsyncResult<Broker, exn> =
         async {
@@ -61,3 +63,4 @@ module BrokersRepository =
             with ex ->
                 return Error ex
         }
+        |> AsyncResult.mapError handleExceptions

@@ -62,7 +62,6 @@ module Degiro =
         let convertTransaction (broker : Broker) (transaction : DegiroTransaction) =
             let ticker =
                 context.FetchTicker transaction.ISIN transaction.Exchange
-                |> AsyncResult.teeError(fun e -> Console.WriteLine $"%s{deconstruct transaction.ISIN} - %s{transaction.Exchange}")
 
             let mk (ticker : Ticker) =
                 { Transaction.TransactionId = TransactionId.empty

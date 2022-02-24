@@ -9,6 +9,7 @@
     <Compile Include="Models\Ticker.fs" />
     <Compile Include="Models\Transaction.fs" />
     <Compile Include="Models\Broker.fs" />
+    <Compile Include="PostgreSQL.fs" />
     <Compile Include="TransactionsRepository.fs" />
     <Compile Include="TickersRepository.fs" />
     <Compile Include="BrokersRepository.fs" />

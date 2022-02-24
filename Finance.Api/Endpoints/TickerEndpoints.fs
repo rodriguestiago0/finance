@@ -10,6 +10,7 @@ open Finance.Api.Helpers
 open Finance.Api.Models
 open Finance.Application.Ticker
 open Finance.Model.Investment
+open Microsoft.Extensions.Logging
 
 [<RequireQualifiedAccess>]
 module Ticker =

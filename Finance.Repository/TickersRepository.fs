@@ -38,6 +38,7 @@ module TickersRepository =
         |> AsyncResult.map (List.map TickerDto.toDomain >> Result.sequence)
         |> Async.map Result.flatten
         |> AsyncResult.map List.ofSeq
+        |> AsyncResult.mapError handleExceptions
     
     let getByISINAndExchange connectionString (isin : ISIN) (exchange : string) : AsyncResult<Ticker, exn> =
         let isin = deconstruct isin
@@ -49,6 +50,7 @@ module TickersRepository =
         |> Sql.executeRowAsync mapToDto
         |> AsyncResult.ofTask 
         |> Async.map (Result.bind TickerDto.toDomain)
+        |> AsyncResult.mapError handleExceptions
         
     let getByExternalId connectionString (tickerExternalId : ExternalTickerId) : AsyncResult<Ticker, exn> =
         connectionString
@@ -58,6 +60,7 @@ module TickersRepository =
         |> Sql.executeRowAsync mapToDto
         |> AsyncResult.ofTask 
         |> Async.map (Result.bind TickerDto.toDomain)
+        |> AsyncResult.mapError handleExceptions
     
     let createTicker connectionString (ticker : Ticker) : AsyncResult<Ticker, exn> =
         async {
@@ -87,3 +90,4 @@ module TickersRepository =
             with ex ->
                 return Error ex
         }
+        |> AsyncResult.mapError handleExceptions

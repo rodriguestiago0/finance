@@ -5,9 +5,11 @@ open Finance.Application.Broker
 open Finance.Application.Degiro
 open Finance.Application.Ticker
 open Microsoft.AspNetCore.Builder
+open Microsoft.AspNetCore.HttpLogging
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Logging
 
 let configureSettings (configurationBuilder: IConfigurationBuilder) =
     configurationBuilder.SetBasePath(AppContext.BaseDirectory)
@@ -16,18 +18,26 @@ let configureSettings (configurationBuilder: IConfigurationBuilder) =
 [<EntryPoint>]
 let main args =
     let builder = WebApplication.CreateBuilder(args)
+    builder.Logging.AddConsole() |> ignore
     let configurationBuilder = ConfigurationBuilder() |> configureSettings
     let settings = configurationBuilder.Build().Get<Settings>()
-    
+
     let degiroContext = DegiroContext.Create settings.SqlConnectionString
     let tickerContext = TickerContext.Create settings.SqlConnectionString
     let brokerContext = BrokerContext.Create settings.SqlConnectionString
     let services = builder.Services
+
+    services.AddHttpLogging(fun logging ->
+        logging.LoggingFields <- HttpLoggingFields.RequestBody ) |> ignore
     
     services.AddEndpointsApiExplorer() |> ignore
     services.AddSwaggerGen() |> ignore
     
     let app = builder.Build()
+
+    app.UseHttpsRedirection() |> ignore;
+    app.UseHttpLogging() |> ignore
+
 
     Ticker.registerEndpoint app tickerContext |> ignore
     Broker.registerEndpoint app brokerContext degiroContext |> ignore
@@ -35,12 +45,12 @@ let main args =
     if app.Environment.IsDevelopment() then
         app.UseSwagger() |> ignore;
         app.UseSwaggerUI() |> ignore;
-    
-    app.UseHttpsRedirection() |> ignore;
-    
-    Console.WriteLine($"Application Name: {builder.Environment.ApplicationName}");
-    Console.WriteLine($"Environment Name: {builder.Environment.EnvironmentName}");
-    Console.WriteLine($"ContentRoot Path: {builder.Environment.ContentRootPath}");
+
+    let log = app.Logger
+
+    log.LogInformation($"Application Name: {builder.Environment.ApplicationName}");
+    log.LogInformation($"Environment Name: {builder.Environment.EnvironmentName}");
+    log.LogInformation($"ContentRoot Path: {builder.Environment.ContentRootPath}");
     
     app.Run()
 

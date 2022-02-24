@@ -89,14 +89,25 @@ module DateTimes =
 module Exceptions =
     type NotFoundException(message) =
         inherit Exception(message)
-        new() = NotFoundException(String.Empty)
+        new() = NotFoundException(null)
 
     type NoContentException() =
         inherit Exception()
 
     type BadRequestException(message) =
         inherit Exception(message)
+        new() = BadRequestException(null)
 
     type ForbiddenException(message) =
         inherit Exception(message)
-        new() = ForbiddenException(String.Empty)
+        new() = ForbiddenException(null)
+
+
+    type ConflictException(message) =
+        inherit Exception(message)
+        new() = ConflictException(null)
+
+    let inline isNotFoundException (e: exn) =
+        match e with
+        | :? NotFoundException -> true
+        | _ -> false
