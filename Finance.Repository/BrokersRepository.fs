@@ -8,16 +8,18 @@ open Finance.Model.Investment
 open Finance.Repository.Models
 
 module BrokersRepository =
-    let mapToDto (read : RowReader) =
-        { BrokerDto.BrokerId = read.int "broker_id"
-          ExternalBrokerId = read.uuid "external_broker_id"
-          Name = read.string "name" }
+    type BrokerDto
+    with
+        static member ofRowReader (read : RowReader) =
+            { BrokerDto.BrokerId = read.int "broker_id"
+              ExternalBrokerId = read.uuid "external_broker_id"
+              Name = read.string "name" }
     
     let getBrokers connectionString : AsyncResult<List<Broker>, exn> =
         connectionString
         |> Sql.connect
         |> Sql.query "SELECT * FROM broker"
-        |> Sql.executeAsync mapToDto
+        |> Sql.executeAsync BrokerDto.ofRowReader
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map BrokerDto.toDomain)
         
@@ -26,7 +28,7 @@ module BrokersRepository =
         |> Sql.connect
         |> Sql.query "SELECT * FROM broker WHERE name = @Name"
         |> Sql.parameters [ "@Name", Sql.string name]
-        |> Sql.executeRowAsync mapToDto
+        |> Sql.executeRowAsync BrokerDto.ofRowReader
         |> AsyncResult.ofTask 
         |> AsyncResult.map BrokerDto.toDomain
         |> AsyncResult.mapError handleExceptions
@@ -36,7 +38,7 @@ module BrokersRepository =
         |> Sql.connect
         |> Sql.query "SELECT * FROM broker WHERE external_broker_id = @BrokerExternalId"
         |> Sql.parameters [ "@BrokerExternalId", Sql.uuid (deconstruct externalId)]
-        |> Sql.executeRowAsync mapToDto
+        |> Sql.executeRowAsync BrokerDto.ofRowReader
         |> AsyncResult.ofTask
         |> AsyncResult.map BrokerDto.toDomain
         |> AsyncResult.mapError handleExceptions
@@ -57,7 +59,7 @@ module BrokersRepository =
                             RETURNING *"
                     |> Sql.parameters [ ("@ExternalBrokerId", Sql.uuid brokerDto.ExternalBrokerId)
                                         ("@Name", Sql.string brokerDto.Name) ]
-                    |> Sql.executeRowAsync mapToDto
+                    |> Sql.executeRowAsync BrokerDto.ofRowReader
                     |> AsyncResult.ofTask
                     |> AsyncResult.map BrokerDto.toDomain
             with ex ->

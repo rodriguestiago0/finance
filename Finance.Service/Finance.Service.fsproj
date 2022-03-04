@@ -21,7 +21,7 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="hostsettings.json" />
-    <Compile Include="Worker.fs" />
+    <Compile Include="CloseTransactionWorker.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

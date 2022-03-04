@@ -28,7 +28,7 @@ let main argv =
     let serviceConfig (ctx: HostBuilderContext) (sCfg: IServiceCollection) =
 
         sCfg.AddLogging()
-            .AddHostedService<WorkerService>()
+            .AddHostedService<CloseTransactionWorker>()
             |> ignore
 
     let loggingConfig (_: HostBuilderContext) (lCfg: ILoggingBuilder) =

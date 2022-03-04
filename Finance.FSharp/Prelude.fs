@@ -16,6 +16,21 @@ module Prelude =
     let nullable (x: 't)    
         = Nullable<'t>(x)
 
+    let inline flip f a b = f b a
+
+[<AutoOpen>]
+module Seqs =
+    let (|NotEmptySeq|_|) a =
+        if Seq.isEmpty a then None
+        else Some a
+
+[<AutoOpen>]
+module Arrays =
+    let getLastN n array =
+        match Array.length array with
+        | l when l <= n -> array
+        | l -> Array.skip (l - n) array
+
 [<AutoOpen>]
 module TypeIds =
     let inline deconstruct x = (^a: (member Deconstruct: unit -> ^b) x)
@@ -102,6 +117,13 @@ module Exceptions =
         inherit Exception(message)
         new() = ForbiddenException(null)
 
+    type ValidationException(exns: exn []) =
+        inherit AggregateException(exns)
+
+        static member ofErrors errors =
+            (Seq.map Exception errors)
+            |> Array.ofSeq
+            |> ValidationException :> exn
 
     type ConflictException(message) =
         inherit Exception(message)

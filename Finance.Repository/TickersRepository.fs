@@ -8,22 +8,24 @@ open Finance.Model.Investment
 open Finance.Repository.Models
 
 module TickersRepository =
-    let mapToDto (read : RowReader) =
-        { TickerDto.TickerId = read.int "ticker_id"
-          ExternalTickerId = read.uuid "external_ticker_id"
-          ShortId = read.string "short_id"
-          TickerType = read.int "ticker_type"
-          ISIN = read.string "isin"
-          Name = read.string "name"
-          Exchange = read.string "exchange"
-          Currency = read.int "currency"
-          TaxationRequired = read.bool "taxation_required" }
+    type TickerDto
+    with
+        static member ofRowReader (read : RowReader) =
+            { TickerDto.TickerId = read.int "ticker_id"
+              ExternalTickerId = read.uuid "external_ticker_id"
+              ShortId = read.string "short_id"
+              TickerType = read.int "ticker_type"
+              ISIN = read.string "isin"
+              Name = read.string "name"
+              Exchange = read.string "exchange"
+              Currency = read.int "currency"
+              TaxationRequired = read.bool "taxation_required" }
     
     let getAll connectionString : AsyncResult<List<Ticker>, exn> =
         connectionString
         |> Sql.connect
         |> Sql.query "SELECT * FROM ticker"
-        |> Sql.executeAsync mapToDto
+        |> Sql.executeAsync TickerDto.ofRowReader
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map TickerDto.toDomain >> Result.sequence)
         |> Async.map Result.flatten
@@ -33,8 +35,8 @@ module TickersRepository =
         connectionString
         |> Sql.connect
         |> Sql.query "SELECT * FROM ticker where taxation_required = true"
-        |> Sql.executeAsync mapToDto
-        |> AsyncResult.ofTask 
+        |> Sql.executeAsync TickerDto.ofRowReader
+        |> AsyncResult.ofTask
         |> AsyncResult.map (List.map TickerDto.toDomain >> Result.sequence)
         |> Async.map Result.flatten
         |> AsyncResult.map List.ofSeq
@@ -47,7 +49,7 @@ module TickersRepository =
         |> Sql.query "SELECT * FROM ticker WHERE isin = @isin and exchange = @exchange"
         |> Sql.parameters [ ("@isin", Sql.string isin)
                             ("@exchange", Sql.string exchange) ]
-        |> Sql.executeRowAsync mapToDto
+        |> Sql.executeRowAsync TickerDto.ofRowReader
         |> AsyncResult.ofTask 
         |> Async.map (Result.bind TickerDto.toDomain)
         |> AsyncResult.mapError handleExceptions
@@ -57,7 +59,7 @@ module TickersRepository =
         |> Sql.connect
         |> Sql.query "SELECT * FROM ticker WHERE external_ticker_id = @tickerExternalId"
         |> Sql.parameters [ "@tickerExternalId", Sql.uuid (deconstruct tickerExternalId) ]
-        |> Sql.executeRowAsync mapToDto
+        |> Sql.executeRowAsync TickerDto.ofRowReader
         |> AsyncResult.ofTask 
         |> Async.map (Result.bind TickerDto.toDomain)
         |> AsyncResult.mapError handleExceptions
@@ -84,7 +86,7 @@ module TickersRepository =
                                         ("@exchange", Sql.string tickerDto.Exchange)
                                         ("@currency", Sql.int tickerDto.Currency)
                                         ("@taxationRequired", Sql.bool tickerDto.TaxationRequired) ]
-                    |> Sql.executeRowAsync mapToDto
+                    |> Sql.executeRowAsync TickerDto.ofRowReader
                     |> AsyncResult.ofTask
                     |> Async.map (Result.bind TickerDto.toDomain)
             with ex ->

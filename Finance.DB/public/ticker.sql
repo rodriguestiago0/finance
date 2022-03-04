@@ -19,6 +19,7 @@ create unique index ticker_external_ticker_id_uindex
 create unique index ticker_ticker_id_uindex
     on ticker (ticker_id);
 
- exists ticker_ticker_id_uindex
-    on ticker (ticker_id);
+create unique index ticker_isin_uindex
+    on ticker (isin);
+
 

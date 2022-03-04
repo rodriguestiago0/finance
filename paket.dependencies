@@ -11,3 +11,4 @@ group Main
     nuget Fleece.SystemTextJson == 0.10.0-RC11
     nuget Swashbuckle.AspNetCore
     nuget Microsoft.Extensions.Hosting
+    nuget Microsoft.Extensions.Logging

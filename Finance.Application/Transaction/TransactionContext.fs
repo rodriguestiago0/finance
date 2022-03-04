@@ -3,20 +3,29 @@
 open Finance.FSharp
 open Finance.Model.Investment
 open Finance.Repository
+open Microsoft.Extensions.Logging
      
 type FetchTaxableTickers = unit -> AsyncResult<List<Ticker>, exn>
-type FetchTransactionsByTicker = TickerId -> AsyncResult<List<Transaction>, exn>
+type FetchOpenTransactionsByTicker = TickerId -> AsyncResult<List<Transaction>, exn>
+type SaveClosedTransactions = List<CloseTransaction> -> AsyncResult<int, exn>
 
 type TransactionContext =
     { FetchTaxableTickers : FetchTaxableTickers
-      FetchTransactionsByTicker : FetchTransactionsByTicker }
+      FetchOpenTransactionsByTicker : FetchOpenTransactionsByTicker
+      SaveClosedTransactions : SaveClosedTransactions
+      Log : ILogger }
 with
-    static member Create sqlConnectionString =
+    static member Create sqlConnectionString log =
         let fetchTaxableTickers _ =
             TickersRepository.getTaxableTickers sqlConnectionString
             
-        let fetchTransactionsByTicker =
-            TransactionsRepository.getByTickerId sqlConnectionString
+        let fetchOpenTransactionsByTicker =
+            TransactionsRepository.getOpenTransactionByTickerId sqlConnectionString
+
+        let saveClosedTransactions =
+            CloseTransactionsRepository.createCloseTransactions sqlConnectionString
             
         { FetchTaxableTickers = fetchTaxableTickers
-          FetchTransactionsByTicker = fetchTransactionsByTicker }
+          FetchOpenTransactionsByTicker = fetchOpenTransactionsByTicker
+          SaveClosedTransactions = saveClosedTransactions
+          Log = log }
