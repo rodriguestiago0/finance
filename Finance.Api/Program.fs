@@ -27,24 +27,27 @@ let main args =
     let brokerContext = BrokerContext.Create settings.SqlConnectionString
     let services = builder.Services
 
-    services.AddHttpLogging(fun logging ->
-        logging.LoggingFields <- HttpLoggingFields.RequestBody ) |> ignore
-    
-    services.AddEndpointsApiExplorer() |> ignore
-    services.AddSwaggerGen() |> ignore
-    
+    services.AddHttpLogging(fun logging -> logging.LoggingFields <- HttpLoggingFields.Request )
+            .AddEndpointsApiExplorer()
+            .AddSwaggerGen()
+            .AddCors(fun options ->
+                            options.AddPolicy("AllowAll", fun builder ->
+                                 builder.AllowAnyHeader()
+                                        .AllowAnyOrigin()
+                                        .AllowAnyMethod() |> ignore)) |> ignore
+
     let app = builder.Build()
 
-    app.UseHttpsRedirection() |> ignore;
-    app.UseHttpLogging() |> ignore
-
+    app.UseHttpsRedirection()
+       .UseHttpLogging()
+       .UseCors("AllowAll") |> ignore
 
     Ticker.registerEndpoint app tickerContext |> ignore
     Broker.registerEndpoint app brokerContext degiroContext |> ignore
     
     if app.Environment.IsDevelopment() then
-        app.UseSwagger() |> ignore;
-        app.UseSwaggerUI() |> ignore;
+        app.UseSwagger()
+           .UseSwaggerUI() |> ignore;
 
     let log = app.Logger
 

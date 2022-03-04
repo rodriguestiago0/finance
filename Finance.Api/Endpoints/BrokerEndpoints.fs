@@ -93,14 +93,14 @@ module Broker =
     
     let registerEndpoint (app : WebApplication) (brokerContext : BrokerContext) (degiroContext : DegiroContext) =
     
-        app.MapPost("/brokers", Func<BrokerDto,Task<IResult>>(createBroker brokerContext))
+        app.MapPost("/api/brokers", Func<BrokerDto,Task<IResult>>(createBroker brokerContext))
             .WithTags("Brokers") |> ignore
-        app.MapGet("/brokers", Func<Task<IResult>>(getBrokers brokerContext))
+        app.MapGet("/api/brokers", Func<Task<IResult>>(getBrokers brokerContext))
             .WithTags("Brokers") |> ignore
-        app.MapGet("/brokers/{id}", Func<Guid, Task<IResult>> (fun (id :Guid) -> getBroker brokerContext id))
+        app.MapGet("/api/brokers/{id}", Func<Guid, Task<IResult>> (fun (id :Guid) -> getBroker brokerContext id))
             .WithTags("Brokers") |> ignore
-        app.MapPost("/brokers/{id}/transactions", Func<_, _, _> (fun id request -> uploadFile degiroContext id request))
+        app.MapPost("/api/brokers/{id}/transactions", Func<_, _, _> (fun id request -> uploadFile degiroContext id request))
             .Accepts<IFormFile>("multipart/form-data")
             .WithTags("Brokers") |> ignore
-        app.MapGet("/brokers/{id}/transactions", Func<Guid,Task<IResult>>(fun id -> getTransactionByExternalBrokerId brokerContext id))
+        app.MapGet("/api/brokers/{id}/transactions", Func<Guid,Task<IResult>>(fun id -> getTransactionByExternalBrokerId brokerContext id))
             .WithTags("Brokers")

@@ -48,9 +48,9 @@ module Ticker =
         }
         
     let registerEndpoint (app : WebApplication) (tickerContext : TickerContext) =
-        app.MapPost("/tickers", Func<TickerDto,Task<IResult>>(createTicker tickerContext))
+        app.MapPost("/api/tickers", Func<TickerDto,Task<IResult>>(createTicker tickerContext))
             .WithTags("Tickers") |> ignore
-        app.MapGet("/tickers", Func<Task<IResult>>(getTickers tickerContext))
+        app.MapGet("/api/tickers", Func<Task<IResult>>(getTickers tickerContext))
             .WithTags("Tickers") |> ignore
-        app.MapGet("/tickers/{id}", Func<Guid, Task<IResult>>(fun id -> getByExternalId tickerContext id))
+        app.MapGet("/api/tickers/{id}", Func<Guid, Task<IResult>>(fun id -> getByExternalId tickerContext id))
             .WithTags("Tickers")
