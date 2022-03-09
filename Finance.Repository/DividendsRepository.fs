@@ -14,7 +14,8 @@ module DividendsRepository =
             { DividendDto.DividendId = read.uuid "dividend_id"
               TickerId = read.uuid "ticker_id"
               Value = read.decimal "value"
-              Taxes = read.decimalOrNone "taxes" }
+              Taxes = read.decimalOrNone "taxes"
+              ReceivedAt = read.datetimeOffset "received_at" }
     
     let getDividends connectionString : AsyncResult<List<Dividend>, exn> =
         connectionString
@@ -56,12 +57,13 @@ module DividendsRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
-                            dividend (ticker_id, value, taxes)
-                            VALUES (@tickerId, @value, @taxes)
+                            dividend (ticker_id, value, taxes, received_at)
+                            VALUES (@tickerId, @value, @taxes, @receivedAt)
                             RETURNING *"
                     |> Sql.parameters [ ("@tickerId", Sql.uuid dividendDto.TickerId)
                                         ("@value", Sql.decimal dividendDto.Value)
-                                        ("@taxes", Sql.decimalOrNone dividendDto.Taxes)]
+                                        ("@taxes", Sql.decimalOrNone dividendDto.Taxes)
+                                        ("@receivedAt", Sql.timestamptz dividendDto.ReceivedAt)]
                     |> Sql.executeRowAsync DividendDto.ofRowReader
                     |> AsyncResult.ofTask
                     |> AsyncResult.map DividendDto.toDomain

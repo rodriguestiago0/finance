@@ -19,4 +19,5 @@ type Dividend =
     { DividendId : DividendId
       TickerId : TickerId
       Value : decimal
-      Taxes : Option<decimal> }
+      Taxes : Option<decimal>
+      ReceivedAt : DateTimeOffset }
