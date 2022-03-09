@@ -1,18 +1,11 @@
-create table broker
+create table if not exists broker
 (
-    broker_id          serial
+    broker_id  uuid default gen_random_uuid() not null
         constraint broker_pk
             primary key,
-    name               varchar not null,
-    external_broker_id uuid    not null
+    name       varchar                        not null,
+    country_id integer                        not null
 );
 
-create unique index broker_broker_id_uindex
+uindex
     on broker (broker_id);
-
-create unique index broker_external_broker_id_uindex
-    on broker (external_broker_id);
-
-broker_id_uindex
-    on broker (external_broker_id);
-

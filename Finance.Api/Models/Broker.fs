@@ -7,14 +7,16 @@ open Microsoft.FSharp.Core
 
 type BrokerDto =
     { BrokerId : Guid
-      Name : string }
+      Name : string
+      Country : string }
     
     with
         static member toDomain (dto : BrokerDto) : Broker = 
             { Broker.BrokerId = BrokerId.empty
-              ExternalBrokerId = dto.BrokerId |> ExternalBrokerId
-              Name = dto.Name }
+              Name = dto.Name
+              CountryId = CountryMapping.CountryToCode[dto.Country] }
         
         static member ofDomain (domain : Broker) : BrokerDto = 
-            { BrokerDto.BrokerId = deconstruct domain.ExternalBrokerId
-              Name = domain.Name }
+            { BrokerDto.BrokerId = deconstruct domain.BrokerId
+              Name = domain.Name
+              Country = CountryMapping.CodeToCountry[domain.CountryId] }

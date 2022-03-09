@@ -5,8 +5,8 @@ open Finance.FSharp
 open Finance.Model.Investment
 
 type CloseTransactionDto =
-    { BuyTransactionId : int
-      SellTransactionId : int
+    { BuyTransactionId : Guid
+      SellTransactionId : Guid
       Units : decimal }
     
     with

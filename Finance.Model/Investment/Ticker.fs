@@ -4,24 +4,14 @@ open System
 open Finance.Model
 
 type TickerId =
-    TickerId of int
+    TickerId of Guid
     with
         member this.Deconstruct() =
             let (TickerId id) = this
             id
-            
-        static member empty =
-            0 |> TickerId
 
-type ExternalTickerId =
-    ExternalTickerId of Guid
-    with
-        member this.Deconstruct() =
-            let (ExternalTickerId id) = this
-            id
-            
-        static member newExternalTickerId =
-            Guid.NewGuid() |> ExternalTickerId
+        static member empty =
+            Guid.NewGuid() |> TickerId
 
 type ShortId =
     ShortId of string
@@ -57,7 +47,6 @@ type TickerType =
 
 type Ticker =
     { TickerId : TickerId
-      ExternalTickerId : ExternalTickerId
       ShortId : ShortId
       TickerType : TickerType
       ISIN : ISIN

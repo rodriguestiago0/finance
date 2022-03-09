@@ -24,7 +24,7 @@ with
 
         let saveClosedTransactions =
             CloseTransactionsRepository.createCloseTransactions sqlConnectionString
-            
+
         { FetchTaxableTickers = fetchTaxableTickers
           FetchOpenTransactionsByTicker = fetchOpenTransactionsByTicker
           SaveClosedTransactions = saveClosedTransactions

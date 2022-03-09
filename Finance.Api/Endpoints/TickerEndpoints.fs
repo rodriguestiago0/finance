@@ -10,7 +10,6 @@ open Finance.Api.Helpers
 open Finance.Api.Models
 open Finance.Application.Ticker
 open Finance.Model.Investment
-open Microsoft.Extensions.Logging
 
 [<RequireQualifiedAccess>]
 module Ticker =
@@ -21,7 +20,7 @@ module Ticker =
                 |> Async.retn
             
             let buildUri (ticker : TickerDto) =
-                sprintf "/tickers/%O" ticker.TickerId
+                $"/tickers/{ticker.TickerId}"
                 
             return! 
                 ticker
@@ -38,19 +37,30 @@ module Ticker =
                 |> IResults.ok
         }
         
-    let private getByExternalId (tickerContext : TickerContext) (externalId : Guid) =
+    let private getById (tickerContext : TickerContext) (id : Guid) =
         task{
             return!
-                ExternalTickerId externalId
-                |> tickerContext.FetchTickerByExternalId
+                TickerId id
+                |> tickerContext.FetchTickerById
+                |> AsyncResult.map TickerDto.ofDomain
+                |> IResults.ok
+        }
+
+    let private createDividends (tickerContext : TickerContext) (id : Guid) (dto : DividendDto) =
+        task{
+            return!
+                TickerId id
+                |> tickerContext.FetchTickerById
                 |> AsyncResult.map TickerDto.ofDomain
                 |> IResults.ok
         }
         
     let registerEndpoint (app : WebApplication) (tickerContext : TickerContext) =
         app.MapPost("/api/tickers", Func<TickerDto,Task<IResult>>(createTicker tickerContext))
-            .WithTags("Tickers") |> ignore
+           .WithTags("Tickers") |> ignore
         app.MapGet("/api/tickers", Func<Task<IResult>>(getTickers tickerContext))
-            .WithTags("Tickers") |> ignore
-        app.MapGet("/api/tickers/{id}", Func<Guid, Task<IResult>>(fun id -> getByExternalId tickerContext id))
-            .WithTags("Tickers")
+           .WithTags("Tickers") |> ignore
+        app.MapGet("/api/tickers/{id}", Func<Guid, Task<IResult>>(fun id -> getById tickerContext id))
+           .WithTags("Tickers") |> ignore
+        app.MapPost("/api/tickers/{id}/dividends", Func<Guid, DividendDto, Task<IResult>>(fun id dto -> createDividends tickerContext id dto))
+           .WithTags("Tickers") |> ignore

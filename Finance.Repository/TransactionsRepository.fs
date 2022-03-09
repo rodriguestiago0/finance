@@ -10,27 +10,24 @@ module TransactionsRepository =
     type TransactionDto
     with
         static member ofRowReader (read : RowReader) =
-            ({ TransactionDto.TransactionId = read.int "transaction_id"
-               ExternalTransactionId = read.uuid "external_transaction_id"
-               BrokerTransactionId = read.stringOrNone "broker_transaction_id"
-               TickerId = read.int "ticker_id"
-               Date = read.datetimeOffset "date"
-               Units = read.decimal "units"
-               Price = read.decimal "price"
-               LocalPrice = read.decimalOrNone "local_price"
-               Fee = read.decimalOrNone "fee"
-               ExchangeRate = read.decimalOrNone "exchange_rate"
-               BrokerId = read.int "broker_id"
-               Note = read.stringOrNone "note" }, read.uuid "external_broker_id", read.uuid "external_ticker_id")
+            { TransactionDto.TransactionId = read.uuid "transaction_id"
+              BrokerTransactionId = read.stringOrNone "broker_transaction_id"
+              TickerId = read.uuid "ticker_id"
+              Date = read.datetimeOffset "date"
+              Units = read.decimal "units"
+              Price = read.decimal "price"
+              LocalPrice = read.decimalOrNone "local_price"
+              Fee = read.decimalOrNone "fee"
+              ExchangeRate = read.decimalOrNone "exchange_rate"
+              BrokerId = read.uuid "broker_id"
+              Note = read.stringOrNone "note" }
 
-    let getByBrokerExternalId connectionString (externalBrokerId : ExternalBrokerId) : AsyncResult<List<Transaction>, exn> =
+    let getByBrokerExternalId connectionString (brokerId : BrokerId) : AsyncResult<List<Transaction>, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT t.*, b.external_broker_id, ti.external_ticker_id FROM transaction t
-                      INNER JOIN broker b on b.broker_id = t.broker_id
-                      INNER JOIN ticker ti on ti.ticker_id = t.ticker_id
-                      WHERE b.external_broker_id = @externalBrokerId"
-        |> Sql.parameters [ "@externalBrokerId", Sql.uuid (deconstruct externalBrokerId) ]
+        |> Sql.query "SELECT * FROM transaction
+                      WHERE broker_id = @brokerId"
+        |> Sql.parameters [ "@brokerId", Sql.uuid (deconstruct brokerId) ]
         |> Sql.executeAsync TransactionDto.ofRowReader
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map TransactionDto.toDomain)
@@ -39,11 +36,9 @@ module TransactionsRepository =
     let getByTickerId connectionString (tickerId : TickerId) : AsyncResult<List<Transaction>, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT t.*, b.external_broker_id, ti.external_ticker_id FROM transaction t
-                      INNER JOIN broker b on b.broker_id = t.broker_id
-                      INNER JOIN ticker ti on ti.ticker_id = t.ticker_id
-                      WHERE ti.ticker_id = @tickerId"
-        |> Sql.parameters [ "@tickerId", Sql.int (deconstruct tickerId) ]
+        |> Sql.query "SELECT * FROM transaction
+                      WHERE ticker_id = @tickerId"
+        |> Sql.parameters [ "@tickerId", Sql.uuid (deconstruct tickerId) ]
         |> Sql.executeAsync TransactionDto.ofRowReader
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map TransactionDto.toDomain)
@@ -55,15 +50,11 @@ module TransactionsRepository =
         |> Sql.query "with w as
                                 (SELECT
                                         t.*,
-                                        b.external_broker_id,
-                                        ti.external_ticker_id,
                                         sum(ct.Units) as total
                                 FROM transaction t
-                                    INNER JOIN broker b on b.broker_id = t.broker_id
-                                    INNER JOIN ticker ti on ti.ticker_id = t.ticker_id
                                     FULL JOIN closed_transaction ct on ct.buy_transaction_id = t.transaction_id or ct.sell_transaction_id = t.transaction_id
                                 where ti.ticker_id = @tickerId
-                                group by t.transaction_id, b.external_broker_id, ti.external_ticker_id)
+                                group by t.transaction_id)
                             select
                                    w.transaction_id,
                                    w.external_transaction_id,
@@ -85,7 +76,7 @@ module TransactionsRepository =
                                    end as units
                             from w
                             where w.total <> abs(w.units) or w.total is null"
-        |> Sql.parameters [ "@tickerId", Sql.int (deconstruct tickerId) ]
+        |> Sql.parameters [ "@tickerId", Sql.uuid (deconstruct tickerId) ]
         |> Sql.executeAsync TransactionDto.ofRowReader
         |> AsyncResult.ofTask
         |> AsyncResult.map (List.map TransactionDto.toDomain)
@@ -98,17 +89,16 @@ module TransactionsRepository =
                     transactions
                     |> Seq.map TransactionDto.ofDomain
                     |> Seq.map (fun transaction ->
-                            [ "@ExternalTransactionId", Sql.uuid transaction.ExternalTransactionId
-                              "@BrokerTransactionId", Sql.stringOrNone transaction.BrokerTransactionId 
-                              "@TickerId", Sql.int transaction.TickerId 
-                              "@Date", Sql.timestamptz transaction.Date 
-                              "@Units", Sql.decimal transaction.Units 
-                              "@Price", Sql.decimal transaction.Price 
-                              "@LocalPrice", Sql.decimalOrNone transaction.LocalPrice 
-                              "@Fee", Sql.decimalOrNone transaction.Fee
-                              "@ExchangeRate", Sql.decimalOrNone transaction.ExchangeRate
-                              "@BrokerId", Sql.int transaction.BrokerId
-                              "@Note", Sql.stringOrNone transaction.Note ]
+                            [ "@brokerTransactionId", Sql.stringOrNone transaction.BrokerTransactionId
+                              "@tickerId", Sql.uuid transaction.TickerId
+                              "@date", Sql.timestamptz transaction.Date
+                              "@units", Sql.decimal transaction.Units
+                              "@price", Sql.decimal transaction.Price
+                              "@localPrice", Sql.decimalOrNone transaction.LocalPrice
+                              "@fee", Sql.decimalOrNone transaction.Fee
+                              "@exchangeRate", Sql.decimalOrNone transaction.ExchangeRate
+                              "@brokerId", Sql.uuid transaction.BrokerId
+                              "@note", Sql.stringOrNone transaction.Note ]
                         )
                     |> List.ofSeq
                 
@@ -116,8 +106,8 @@ module TransactionsRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.executeTransactionAsync [ "INSERT INTO
-                            Transaction (external_transaction_id, broker_transaction_id, ticker_id, date, units, price, local_price, fee, exchange_rate, broker_id, note)
-                            VALUES (@ExternalTransactionId, @BrokerTransactionId, @TickerId, @Date, @Units, @Price, @LocalPrice, @Fee, @ExchangeRate, @BrokerId, @Note)", data]
+                            Transaction (broker_transaction_id, ticker_id, date, units, price, local_price, fee, exchange_rate, broker_id, note)
+                            VALUES (@brokerTransactionId, @tickerId, @date, @units, @price, @localPrice, @fee, @exchangeRate, @brokerId, @note)", data]
                     |> Async.AwaitTask
                 return Ok (List.sum result)
             with ex ->

@@ -23,7 +23,6 @@ type TickerDto =
             let currency = Currency.fromInt dto.Currency
             let mk tickerType currency = 
                 { Ticker.TickerId = TickerId.empty
-                  ExternalTickerId = dto.TickerId |> ExternalTickerId
                   ShortId = dto.ShortId |> ShortId
                   TickerType = tickerType
                   ISIN = dto.ISIN |> ISIN
@@ -36,7 +35,7 @@ type TickerDto =
             <*> currency
         
         static member ofDomain (domain : Ticker) : TickerDto =
-            { TickerDto.TickerId = deconstruct domain.ExternalTickerId
+            { TickerDto.TickerId = deconstruct domain.TickerId
               ShortId = deconstruct domain.ShortId
               TickerType = TickerType.toInt domain.TickerType
               ISIN = deconstruct domain.ISIN

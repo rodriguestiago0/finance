@@ -22,7 +22,7 @@ module Degiro =
           Fee : Option<decimal>
           ExchangeRate : Option<decimal> }
 
-    let importCSV (context : DegiroContext) (externalBrokerId : Guid) (stream : Stream) =
+    let importCSV (context : DegiroContext) (brokerId : Guid) (stream : Stream) =
         let readLines (stream : Stream) = seq {
             use sr = new StreamReader (stream)
             let _ = sr.ReadLine ()
@@ -65,10 +65,8 @@ module Degiro =
 
             let mk (ticker : Ticker) =
                 { Transaction.TransactionId = TransactionId.empty
-                  ExternalTransactionId = ExternalTransactionId.newExternalTransactionId
                   BrokerTransactionId = transaction.BrokerTransactionId |> Some
                   TickerId = ticker.TickerId
-                  ExternalTickerId = ticker.ExternalTickerId
                   Date = transaction.Date
                   Units = transaction.Units
                   Price = transaction.Price
@@ -76,7 +74,6 @@ module Degiro =
                   Fee = transaction.Fee
                   ExchangeRate = transaction.ExchangeRate
                   BrokerId = broker.BrokerId
-                  ExternalBrokerId = broker.ExternalBrokerId
                   Note = None }
 
             mk
@@ -112,7 +109,7 @@ module Degiro =
             |> AsyncResult.bind parseDegiroTransaction
         
         let broker =
-           context.FetchBroker (externalBrokerId |> ExternalBrokerId)
+           context.FetchBroker (brokerId |> BrokerId)
         
         let lines =
             readLines stream

@@ -5,17 +5,16 @@ open Finance.FSharp
 open Finance.Model.Investment
 
 type BrokerDto =
-    { BrokerId : int
-      ExternalBrokerId : Guid
-      Name : string }
-    
+    { BrokerId : Guid
+      Name : string
+      CountryId : int }
     with
         static member ofDomain (model : Broker) : BrokerDto =
             { BrokerDto.BrokerId = deconstruct model.BrokerId
-              ExternalBrokerId = deconstruct model.ExternalBrokerId
-              Name = model.Name }
+              Name = model.Name
+              CountryId = model.CountryId }
             
         static member toDomain (dto : BrokerDto) : Broker =
             { Broker.BrokerId = dto.BrokerId |> BrokerId
-              ExternalBrokerId = dto.ExternalBrokerId |> ExternalBrokerId
-              Name = dto.Name }
+              Name = dto.Name
+              CountryId = dto.CountryId }

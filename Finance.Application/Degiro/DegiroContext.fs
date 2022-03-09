@@ -5,7 +5,7 @@ open Finance.Model.Investment
 open Finance.Repository
 
 type FetchTicker = ISIN -> string -> AsyncResult<Ticker, exn>
-type FetchBroker =  ExternalBrokerId -> AsyncResult<Broker, exn>
+type FetchBroker =  BrokerId -> AsyncResult<Broker, exn>
 type SaveTransactions = seq<Transaction> -> AsyncResult<int, exn>
 
 type DegiroContext =
@@ -19,7 +19,7 @@ with
             TickersRepository.getByISINAndExchange sqlConnectionString
             
         let fetchBroker =
-           BrokersRepository.getByExternalId sqlConnectionString
+           BrokersRepository.getById sqlConnectionString
             
         let saveTransactions =
             TransactionsRepository.createTransactions sqlConnectionString 

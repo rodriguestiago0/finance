@@ -5,24 +5,24 @@ open Finance.Model.Investment
 open Finance.Repository
 
 type FetchTickers = unit -> AsyncResult<List<Ticker>, exn>
-type FetchTickerByExternalId = ExternalTickerId -> AsyncResult<Ticker, exn>
+type FetchTickerById = TickerId -> AsyncResult<Ticker, exn>
 type SaveTicker = Ticker -> AsyncResult<Ticker, exn>
 
 type TickerContext =
     { FetchTickers : FetchTickers
-      FetchTickerByExternalId : FetchTickerByExternalId
+      FetchTickerById : FetchTickerById
       SaveTicker : SaveTicker }
 with
     static member Create sqlConnectionString =
         let fetchTickers _ =
             TickersRepository.getAll sqlConnectionString
             
-        let fetchTickerByExternalId =
-            TickersRepository.getByExternalId sqlConnectionString
+        let fetchTickerById =
+            TickersRepository.getById sqlConnectionString
             
         let saveTicker =
             TickersRepository.createTicker sqlConnectionString 
                         
-        { FetchTickerByExternalId = fetchTickerByExternalId
+        { FetchTickerById = fetchTickerById
           SaveTicker = saveTicker
           FetchTickers = fetchTickers }

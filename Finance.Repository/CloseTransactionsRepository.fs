@@ -15,9 +15,9 @@ module CloseTransactionsRepository =
                     closeTransactions
                     |> Seq.map CloseTransactionDto.ofDomain
                     |> Seq.map (fun closeTransaction ->
-                            [ "@BuyTransactionId", Sql.int closeTransaction.BuyTransactionId
-                              "@SellTransactionId", Sql.int closeTransaction.SellTransactionId
-                              "@Units", Sql.decimal closeTransaction.Units ]
+                            [ "@buyTransactionId", Sql.uuid closeTransaction.BuyTransactionId
+                              "@sellTransactionId", Sql.uuid closeTransaction.SellTransactionId
+                              "@units", Sql.decimal closeTransaction.Units ]
                         )
                     |> List.ofSeq
                 
@@ -26,7 +26,7 @@ module CloseTransactionsRepository =
                     |> Sql.connect
                     |> Sql.executeTransactionAsync [ "INSERT INTO
                             Closed_Transaction (buy_transaction_id, sell_transaction_id, units)
-                            VALUES (@BuyTransactionId, @SellTransactionId, @Units)", data]
+                            VALUES (@buyTransactionId, @sellTransactionId, @units)", data]
                     |> Async.AwaitTask
                 return Ok (List.sum result)
             with ex ->

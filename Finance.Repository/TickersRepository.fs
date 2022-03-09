@@ -11,8 +11,7 @@ module TickersRepository =
     type TickerDto
     with
         static member ofRowReader (read : RowReader) =
-            { TickerDto.TickerId = read.int "ticker_id"
-              ExternalTickerId = read.uuid "external_ticker_id"
+            { TickerDto.TickerId = read.uuid "ticker_id"
               ShortId = read.string "short_id"
               TickerType = read.int "ticker_type"
               ISIN = read.string "isin"
@@ -54,11 +53,11 @@ module TickersRepository =
         |> Async.map (Result.bind TickerDto.toDomain)
         |> AsyncResult.mapError handleExceptions
         
-    let getByExternalId connectionString (tickerExternalId : ExternalTickerId) : AsyncResult<Ticker, exn> =
+    let getById connectionString (id : TickerId) : AsyncResult<Ticker, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM ticker WHERE external_ticker_id = @tickerExternalId"
-        |> Sql.parameters [ "@tickerExternalId", Sql.uuid (deconstruct tickerExternalId) ]
+        |> Sql.query "SELECT * FROM ticker WHERE ticker_id = @tickerId"
+        |> Sql.parameters [ "@tickerId", Sql.uuid (deconstruct id) ]
         |> Sql.executeRowAsync TickerDto.ofRowReader
         |> AsyncResult.ofTask 
         |> Async.map (Result.bind TickerDto.toDomain)
@@ -75,11 +74,10 @@ module TickersRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
-                            ticker (external_ticker_id, short_id, ticker_type, isin, name, exchange, currency, taxation_required)
-                            VALUES (@externalTickerId, @shortId, @tickerType, @isin, @name, @exchange, @currency, @taxationRequired)
+                            ticker (short_id, ticker_type, isin, name, exchange, currency, taxation_required)
+                            VALUES (@shortId, @tickerType, @isin, @name, @exchange, @currency, @taxationRequired)
                             RETURNING *"
-                    |> Sql.parameters [ ("@externalTickerId", Sql.uuid tickerDto.ExternalTickerId)
-                                        ("@shortId", Sql.string tickerDto.ShortId) 
+                    |> Sql.parameters [ ("@shortId", Sql.string tickerDto.ShortId)
                                         ("@tickerType", Sql.int tickerDto.TickerType) 
                                         ("@isin", Sql.string tickerDto.ISIN) 
                                         ("@name", Sql.string tickerDto.Name) 

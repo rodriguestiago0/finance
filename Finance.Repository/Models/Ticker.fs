@@ -7,8 +7,7 @@ open Finance.Model
 open Finance.Model.Investment
 
 type TickerDto =
-    { TickerId : int
-      ExternalTickerId : Guid
+    { TickerId : Guid
       ShortId : string
       TickerType : int
       ISIN : string
@@ -23,7 +22,6 @@ type TickerDto =
             let currency = Currency.fromInt dto.Currency
             let mk tickerType currency = 
                 { Ticker.TickerId = dto.TickerId |> TickerId
-                  ExternalTickerId = dto.ExternalTickerId |> ExternalTickerId
                   ShortId = dto.ShortId |> ShortId
                   TickerType = tickerType
                   ISIN = dto.ISIN |> ISIN
@@ -37,7 +35,6 @@ type TickerDto =
             
         static member ofDomain (domain : Ticker) :  TickerDto =
             { TickerDto.TickerId = deconstruct domain.TickerId
-              ExternalTickerId = deconstruct domain.ExternalTickerId
               ShortId = deconstruct domain.ShortId
               TickerType = TickerType.toInt domain.TickerType
               ISIN = deconstruct domain.ISIN

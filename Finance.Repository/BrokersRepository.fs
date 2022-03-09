@@ -11,9 +11,9 @@ module BrokersRepository =
     type BrokerDto
     with
         static member ofRowReader (read : RowReader) =
-            { BrokerDto.BrokerId = read.int "broker_id"
-              ExternalBrokerId = read.uuid "external_broker_id"
-              Name = read.string "name" }
+            { BrokerDto.BrokerId = read.uuid "broker_id"
+              Name = read.string "name"
+              CountryId = read.int "country_id" }
     
     let getBrokers connectionString : AsyncResult<List<Broker>, exn> =
         connectionString
@@ -26,18 +26,18 @@ module BrokersRepository =
     let getByName connectionString (name : string) : AsyncResult<Broker, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM broker WHERE name = @Name"
-        |> Sql.parameters [ "@Name", Sql.string name]
+        |> Sql.query "SELECT * FROM broker WHERE name = @name"
+        |> Sql.parameters [ "@name", Sql.string name]
         |> Sql.executeRowAsync BrokerDto.ofRowReader
         |> AsyncResult.ofTask 
         |> AsyncResult.map BrokerDto.toDomain
         |> AsyncResult.mapError handleExceptions
         
-    let getByExternalId connectionString (externalId : ExternalBrokerId) : AsyncResult<Broker, exn> =
+    let getById connectionString (id : BrokerId) : AsyncResult<Broker, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM broker WHERE external_broker_id = @BrokerExternalId"
-        |> Sql.parameters [ "@BrokerExternalId", Sql.uuid (deconstruct externalId)]
+        |> Sql.query "SELECT * FROM broker WHERE broker_id = @brokerId"
+        |> Sql.parameters [ "@brokerId", Sql.uuid (deconstruct id)]
         |> Sql.executeRowAsync BrokerDto.ofRowReader
         |> AsyncResult.ofTask
         |> AsyncResult.map BrokerDto.toDomain
@@ -54,11 +54,11 @@ module BrokersRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
-                            broker (external_broker_id, name)
-                            VALUES (@ExternalBrokerId, @Name)
+                            broker (name, country_id)
+                            VALUES (@name, @countryId)
                             RETURNING *"
-                    |> Sql.parameters [ ("@ExternalBrokerId", Sql.uuid brokerDto.ExternalBrokerId)
-                                        ("@Name", Sql.string brokerDto.Name) ]
+                    |> Sql.parameters [ ("@name", Sql.string brokerDto.Name)
+                                        ("@countryId", Sql.int brokerDto.CountryId)]
                     |> Sql.executeRowAsync BrokerDto.ofRowReader
                     |> AsyncResult.ofTask
                     |> AsyncResult.map BrokerDto.toDomain

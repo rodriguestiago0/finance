@@ -4,6 +4,7 @@ open Finance.Api.Settings
 open Finance.Application.Broker
 open Finance.Application.Degiro
 open Finance.Application.Ticker
+open Finance.Application.Transaction
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.HttpLogging
 open Microsoft.Extensions.Hosting
@@ -25,6 +26,7 @@ let main args =
     let degiroContext = DegiroContext.Create settings.SqlConnectionString
     let tickerContext = TickerContext.Create settings.SqlConnectionString
     let brokerContext = BrokerContext.Create settings.SqlConnectionString
+    let transactionContext = ApiTransactionContext.Create settings.SqlConnectionString
     let services = builder.Services
 
     services.AddHttpLogging(fun logging -> logging.LoggingFields <- HttpLoggingFields.Request )
@@ -42,9 +44,10 @@ let main args =
        .UseHttpLogging()
        .UseCors("AllowAll") |> ignore
 
-    Ticker.registerEndpoint app tickerContext |> ignore
-    Broker.registerEndpoint app brokerContext degiroContext |> ignore
-    
+    Ticker.registerEndpoint app tickerContext
+    Broker.registerEndpoint app brokerContext
+    Transaction.registerEndpoint app transactionContext degiroContext
+
     if app.Environment.IsDevelopment() then
         app.UseSwagger()
            .UseSwaggerUI() |> ignore;
