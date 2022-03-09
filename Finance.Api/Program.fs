@@ -3,6 +3,7 @@ open Finance.Api.Endpoints
 open Finance.Api.Settings
 open Finance.Application.Broker
 open Finance.Application.Degiro
+open Finance.Application.Dividend
 open Finance.Application.Ticker
 open Finance.Application.Transaction
 open Microsoft.AspNetCore.Builder
@@ -24,6 +25,7 @@ let main args =
     let settings = configurationBuilder.Build().Get<Settings>()
 
     let degiroContext = DegiroContext.Create settings.SqlConnectionString
+    let dividendContext = DividendContext.Create settings.SqlConnectionString
     let tickerContext = TickerContext.Create settings.SqlConnectionString
     let brokerContext = BrokerContext.Create settings.SqlConnectionString
     let transactionContext = ApiTransactionContext.Create settings.SqlConnectionString
@@ -47,6 +49,7 @@ let main args =
     Ticker.registerEndpoint app tickerContext
     Broker.registerEndpoint app brokerContext
     Transaction.registerEndpoint app transactionContext degiroContext
+    Dividend.registerEndpoint app dividendContext
 
     if app.Environment.IsDevelopment() then
         app.UseSwagger()
