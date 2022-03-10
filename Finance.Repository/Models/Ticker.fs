@@ -13,8 +13,7 @@ type TickerDto =
       ISIN : string
       Name : string
       Exchange : string
-      Currency : int
-      TaxationRequired : bool }
+      Currency : int }
     
     with
         static member toDomain (dto : TickerDto) : Result<Ticker, exn> =
@@ -27,8 +26,7 @@ type TickerDto =
                   ISIN = dto.ISIN |> ISIN
                   Name = dto.Name
                   Exchange = dto.Exchange
-                  Currency = currency
-                  TaxationRequired = dto.TaxationRequired }
+                  Currency = currency }
             mk
             <!> tickerType
             <*> currency
@@ -40,5 +38,4 @@ type TickerDto =
               ISIN = deconstruct domain.ISIN
               Name = domain.Name
               Exchange = domain.Exchange
-              Currency = Currency.toInt domain.Currency
-              TaxationRequired = domain.TaxationRequired }            
+              Currency = Currency.toInt domain.Currency }

@@ -17,8 +17,7 @@ module TickersRepository =
               ISIN = read.string "isin"
               Name = read.string "name"
               Exchange = read.string "exchange"
-              Currency = read.int "currency"
-              TaxationRequired = read.bool "taxation_required" }
+              Currency = read.int "currency" }
     
     let getAll connectionString : AsyncResult<List<Ticker>, exn> =
         connectionString
@@ -29,18 +28,7 @@ module TickersRepository =
         |> AsyncResult.map (List.map TickerDto.toDomain >> Result.sequence)
         |> Async.map Result.flatten
         |> AsyncResult.map List.ofSeq
-        
-    let getTaxableTickers connectionString : AsyncResult<List<Ticker>, exn> =
-        connectionString
-        |> Sql.connect
-        |> Sql.query "SELECT * FROM ticker where taxation_required = true"
-        |> Sql.executeAsync TickerDto.ofRowReader
-        |> AsyncResult.ofTask
-        |> AsyncResult.map (List.map TickerDto.toDomain >> Result.sequence)
-        |> Async.map Result.flatten
-        |> AsyncResult.map List.ofSeq
-        |> AsyncResult.mapError handleExceptions
-    
+
     let getByISINAndExchange connectionString (isin : ISIN) (exchange : string) : AsyncResult<Ticker, exn> =
         let isin = deconstruct isin
         connectionString
@@ -56,7 +44,8 @@ module TickersRepository =
     let getById connectionString (id : TickerId) : AsyncResult<Ticker, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM ticker WHERE ticker_id = @tickerId"
+        |> Sql.query "SELECT * FROM ticker
+                      WHERE ticker_id = @tickerId"
         |> Sql.parameters [ "@tickerId", Sql.uuid (deconstruct id) ]
         |> Sql.executeRowAsync TickerDto.ofRowReader
         |> AsyncResult.ofTask 
@@ -74,16 +63,15 @@ module TickersRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
-                            ticker (short_id, ticker_type, isin, name, exchange, currency, taxation_required)
-                            VALUES (@shortId, @tickerType, @isin, @name, @exchange, @currency, @taxationRequired)
-                            RETURNING *"
+                                  ticker (short_id, ticker_type, isin, name, exchange, currency)
+                                  VALUES (@shortId, @tickerType, @isin, @name, @exchange, @currency)
+                                  RETURNING *"
                     |> Sql.parameters [ ("@shortId", Sql.string tickerDto.ShortId)
                                         ("@tickerType", Sql.int tickerDto.TickerType) 
                                         ("@isin", Sql.string tickerDto.ISIN) 
                                         ("@name", Sql.string tickerDto.Name) 
                                         ("@exchange", Sql.string tickerDto.Exchange)
-                                        ("@currency", Sql.int tickerDto.Currency)
-                                        ("@taxationRequired", Sql.bool tickerDto.TaxationRequired) ]
+                                        ("@currency", Sql.int tickerDto.Currency) ]
                     |> Sql.executeRowAsync TickerDto.ofRowReader
                     |> AsyncResult.ofTask
                     |> Async.map (Result.bind TickerDto.toDomain)

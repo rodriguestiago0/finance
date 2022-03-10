@@ -52,7 +52,7 @@ module TransactionsRepository =
                                         t.*,
                                         sum(ct.Units) as total
                                 FROM transaction t
-                                    FULL JOIN closed_transaction ct on ct.buy_transaction_id = t.transaction_id or ct.sell_transaction_id = t.transaction_id
+                                FULL JOIN closed_transaction ct on ct.buy_transaction_id = t.transaction_id or ct.sell_transaction_id = t.transaction_id
                                 where ti.ticker_id = @tickerId
                                 group by t.transaction_id)
                             select

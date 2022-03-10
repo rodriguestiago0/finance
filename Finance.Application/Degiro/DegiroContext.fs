@@ -13,7 +13,7 @@ type DegiroContext =
       FetchBroker : FetchBroker
       SaveTransactions : SaveTransactions }
 with
-    static member Create sqlConnectionString =
+    static member create sqlConnectionString =
             
         let fetchTicker =
             TickersRepository.getByISINAndExchange sqlConnectionString

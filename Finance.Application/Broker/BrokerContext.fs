@@ -16,7 +16,7 @@ type BrokerContext =
       FetchBrokerByName : FetchBrokerByName
       SaveBroker : SaveBroker }
 with
-    static member Create sqlConnectionString =
+    static member create sqlConnectionString =
         let fetchBrokers _ =
             BrokersRepository.getBrokers sqlConnectionString
             

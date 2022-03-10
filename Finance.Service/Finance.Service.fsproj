@@ -5,6 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <ServerGarbageCollection>true</ServerGarbageCollection>
+    <UserSecretsId>5fa536b7-400c-4ba1-97d7-adb91c312111</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <Content Include=".dockerignore" />
@@ -22,6 +23,7 @@
     </Content>
     <Content Include="hostsettings.json" />
     <Compile Include="CloseTransactionWorker.fs" />
+    <Compile Include="BankTransactionWorker.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <UserSecretsId>a1f8f111-63f4-4538-8fec-13ef9a26c16b</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <Content Include=".dockerignore" />

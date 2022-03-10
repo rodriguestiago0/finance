@@ -13,7 +13,6 @@ let main argv =
     let hostConfig (hCfg:IConfigurationBuilder) =
         hCfg.SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("hostsettings", optional = true)
-            //.AddEnvironmentVariables(prefix = "PREFIX_")
             .AddCommandLine(argv)
             |> ignore
 
@@ -21,7 +20,6 @@ let main argv =
         aCfg.SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional = false)
             .AddJsonFile( $"appsettings.%s{host.HostingEnvironment.EnvironmentName}.json", optional = true)
-            //.AddEnvironmentVariables(prefix =  "PREFIX_")
             .AddCommandLine(argv)
             |> ignore
 
@@ -29,6 +27,7 @@ let main argv =
 
         sCfg.AddLogging()
             .AddHostedService<CloseTransactionWorker>()
+            .AddHostedService<BankTransactionWorker>()
             |> ignore
 
     let loggingConfig (_: HostBuilderContext) (lCfg: ILoggingBuilder) =

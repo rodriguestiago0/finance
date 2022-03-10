@@ -24,11 +24,11 @@ let main args =
     let configurationBuilder = ConfigurationBuilder() |> configureSettings
     let settings = configurationBuilder.Build().Get<Settings>()
 
-    let degiroContext = DegiroContext.Create settings.SqlConnectionString
+    let degiroContext = DegiroContext.create settings.SqlConnectionString
     let dividendContext = DividendContext.Create settings.SqlConnectionString
-    let tickerContext = TickerContext.Create settings.SqlConnectionString
-    let brokerContext = BrokerContext.Create settings.SqlConnectionString
-    let transactionContext = ApiTransactionContext.Create settings.SqlConnectionString
+    let tickerContext = TickerContext.create settings.SqlConnectionString
+    let brokerContext = BrokerContext.create settings.SqlConnectionString
+    let transactionContext = ApiTransactionContext.create settings.SqlConnectionString
     let services = builder.Services
 
     services.AddHttpLogging(fun logging -> logging.LoggingFields <- HttpLoggingFields.Request )

@@ -10,7 +10,7 @@ type FetchTransactionByBrokerId = BrokerId -> AsyncResult<List<Transaction>, exn
 type ApiTransactionContext =
     { FetchTransactionByBrokerId : FetchTransactionByBrokerId}
 with
-    static member Create sqlConnectionString =
+    static member create sqlConnectionString =
         let fetchTransactionByBrokerId =
             TransactionsRepository.getByBrokerExternalId sqlConnectionString
 

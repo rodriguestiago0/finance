@@ -14,6 +14,7 @@
       <Compile Include="Investment\Order.fs" />
       <Compile Include="Investment\CountryMapping.fs" />
       <Compile Include="Investment\Dividend.fs" />
+      <Compile Include="Investment\TaxWithhold.fs" />
     </ItemGroup>
 
 </Project>

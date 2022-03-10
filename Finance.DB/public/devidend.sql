@@ -7,6 +7,7 @@ create table if not exists devidend
         constraint devidend_ticker_ticker_id_fk
             references ticker,
     value       numeric                        not null,
-    taxes       numeric
+    taxes       numeric,
+    received_at timestamp with time zone       not null
 );
 

@@ -13,7 +13,7 @@ type TickerContext =
       FetchTickerById : FetchTickerById
       SaveTicker : SaveTicker }
 with
-    static member Create sqlConnectionString =
+    static member create sqlConnectionString =
         let fetchTickers _ =
             TickersRepository.getAll sqlConnectionString
             

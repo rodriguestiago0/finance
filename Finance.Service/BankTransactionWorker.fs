@@ -7,9 +7,9 @@ open Finance.FSharp
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
-open Finance.Application.Transaction
+open Finance.Application.BankTransaction
 
-type CloseTransactionWorker(logger : ILogger<CloseTransactionWorker>, configuration : IConfiguration ) =
+type BankTransactionWorker(logger : ILogger<CloseTransactionWorker>, configuration : IConfiguration ) =
     let _logger = logger
     let _configuration = configuration
     member val timer: Timer option = None with get, set
@@ -18,7 +18,7 @@ type CloseTransactionWorker(logger : ILogger<CloseTransactionWorker>, configurat
     interface IHostedService with
         member this.StartAsync(cancellationToken: CancellationToken) =
             "Worker Service running" |> _logger.LogInformation
-            let context = TransactionContext.create _configuration["SqlConnectionString"] _logger
+            let context = BankTransactionContext.create _configuration["SqlConnectionString"] _configuration["SecretId"] _configuration["SecretKey"] _logger
             this.timer <- Some(new Timer(this.DoWork, context, TimeSpan.Zero, TimeSpan.FromHours(6.)))
             this.cancellationToken <- Some cancellationToken
             Task.CompletedTask
@@ -38,12 +38,12 @@ type CloseTransactionWorker(logger : ILogger<CloseTransactionWorker>, configurat
 
     member this.DoWork(state : obj) =
         async{
-            "Start calculating close transactions" |> _logger.LogInformation
-            let context = state :?> TransactionContext
+            "Start fetching bank transactions" |> _logger.LogInformation
+            let context = state :?> BankTransactionContext
             return!
-                Transaction.processCloseTransaction context
+                BankTransactionService.importTransactions context
                 |> AsyncResult.map (konst ())
-                |> AsyncResult.tee (fun _ -> "Done calculating close transactions" |> _logger.LogInformation)
+                |> AsyncResult.tee (fun _ -> "Done fetching bank transactions" |> _logger.LogInformation)
         }
         |> Async.RunSynchronously
         |> ignore

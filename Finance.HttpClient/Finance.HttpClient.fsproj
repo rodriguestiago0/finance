@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="paket.references" />
+    <Compile Include="Http.fs" />
     <Compile Include="Nordigen\Records\Response\Authorization.fs" />
     <Compile Include="Nordigen\Records\Response\EndUserAgreement.fs" />
     <Compile Include="Nordigen\Records\Response\Requisition.fs" />
@@ -13,7 +14,6 @@
     <Compile Include="Nordigen\Records\Request\Requisition.fs" />
     <Compile Include="Nordigen\Records\Request\Login.fs" />
     <Compile Include="Nordigen\NordigenClient.fs" />
-    <Compile Include="Http.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />

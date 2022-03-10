@@ -6,6 +6,48 @@ open System.Text
 open Finance.FSharp
 open Fleece.SystemTextJson
 
+[<AutoOpen>]
+module Http3 =
+    type Method =
+    | Get
+    | Post
+    | Put
+    | Patch
+    | Delete
+    | Head
+    | Options
+    | Trace
+    with
+        static member toNetMethod = function
+            | Get -> HttpMethod.Get
+            | Post -> HttpMethod.Post
+            | Put -> HttpMethod.Put
+            | Patch -> HttpMethod.Patch
+            | Delete -> HttpMethod.Delete
+            | Head -> HttpMethod.Head
+            | Options -> HttpMethod.Options
+            | Trace -> HttpMethod.Trace
+
+    type HttpRequest =
+        { HttpClient : Option<HttpClient>
+          Method : Option<Method>
+          Path : Option<string>
+          BaseUrl : Option<string>
+          Content : Option<HttpContent> }
+
+[<AutoOpen>]
+module Http2 =
+    type HttpBuilder() =
+
+        member _.Yield(_) =
+            failwith ""
+
+        [<CustomOperation("method")>]
+        member __.Method(state, method) =
+            failwith ""
+
+    let Http = HttpBuilder()
+
 [<RequireQualifiedAccess>]
 module Http =
     

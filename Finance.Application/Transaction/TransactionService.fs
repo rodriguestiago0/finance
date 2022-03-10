@@ -76,7 +76,7 @@ module Transaction =
         |> AsyncResult.teeError(fun e -> context.Log.LogInformation $"Failed calculating close transaction for Ticket {deconstruct ticker.TickerId} - {e.Message}")
 
     let processCloseTransaction (context : TransactionContext) =
-        let tickers = context.FetchTaxableTickers()
+        let tickers = context.FetchTickers()
                 
         tickers
         |> AsyncResult.teeError(fun e -> context.Log.LogInformation $"Failed to load the taxable ticker = {e}")
