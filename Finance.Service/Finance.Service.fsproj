@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -24,6 +24,7 @@
     <Content Include="hostsettings.json" />
     <Compile Include="CloseTransactionWorker.fs" />
     <Compile Include="BankTransactionWorker.fs" />
+    <Compile Include="Settings.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

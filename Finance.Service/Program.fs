@@ -2,10 +2,12 @@
 open System
 open System.IO
 open Finance.Service
+open Finance.Service.Settings
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
+open Microsoft.Extensions.Configuration.UserSecrets
 
 
 [<EntryPoint>]
@@ -20,13 +22,14 @@ let main argv =
         aCfg.SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional = false)
             .AddJsonFile( $"appsettings.%s{host.HostingEnvironment.EnvironmentName}.json", optional = true)
+            .AddUserSecrets<Settings>()
             .AddCommandLine(argv)
             |> ignore
 
     let serviceConfig (ctx: HostBuilderContext) (sCfg: IServiceCollection) =
 
         sCfg.AddLogging()
-            .AddHostedService<CloseTransactionWorker>()
+            //.AddHostedService<CloseTransactionWorker>()
             .AddHostedService<BankTransactionWorker>()
             |> ignore
 

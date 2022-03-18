@@ -1,3 +1,4 @@
 ﻿group Main
     FSharp.Core
     Microsoft.Extensions.Hosting
+    Microsoft.Extensions.Configuration.UserSecrets
