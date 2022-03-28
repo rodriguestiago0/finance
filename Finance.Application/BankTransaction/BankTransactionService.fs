@@ -1,7 +1,16 @@
 ﻿namespace Finance.Application.BankTransaction
 
+open Finance.FSharp
+open Finance.HttpClient.Model.Request.Nordigen
+open Finance.HttpClient.Client
+
 [<RequireQualifiedAccess>]
 module BankTransactionService =
-    let importTransactions context =
-        failwith ""
+    let importTransactions (context : BankTransactionContext) =
+        let authorization =
+            let request =
+                { Login.SecretId = context.SecretId
+                  SecretKey = context.SecretKey }
+            NordigenClient.login request
 
+        AsyncResult.retn()

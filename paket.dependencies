@@ -12,3 +12,5 @@ group Main
     nuget Swashbuckle.AspNetCore
     nuget Microsoft.Extensions.Hosting
     nuget Microsoft.Extensions.Logging
+    nuget Microsoft.Extensions.Configuration.UserSecrets
+    nuget System.Runtime.Caching

@@ -1,3 +1,4 @@
 ﻿group Main
     FSharp.Core
     Fleece.SystemTextJson
+    System.Runtime.Caching

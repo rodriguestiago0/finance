@@ -1,10 +1,12 @@
 ﻿namespace Finance.Application.BankTransaction
 
+open System
+
 type BankTransactionContext =
-    { SecretId : string
+    { SecretId : Guid
       SecretKey : string }
 
 with
-    static member create sqlConnectionString secretId secretKey log =
-        { BankTransactionContext.SecretId = secretId
+    static member create sqlConnectionString (secretId : string) (secretKey : string) log =
+        { BankTransactionContext.SecretId = secretId |> Guid
           SecretKey = secretKey }

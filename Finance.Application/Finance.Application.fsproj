@@ -14,11 +14,12 @@
     <Compile Include="Transaction\ApiTransactionContext.fs" />
     <Compile Include="Transaction\TransactionService.fs" />
     <Compile Include="Dividend\DividendContext.fs" />
-    <Compile Include="BankTransaction\BankTransactionService.fs" />
     <Compile Include="BankTransaction\BankTransactionContext.fs" />
+    <Compile Include="BankTransaction\BankTransactionService.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />
+    <ProjectReference Include="..\Finance.HttpClient\Finance.HttpClient.fsproj" />
     <ProjectReference Include="..\Finance.Model\Finance.Model.fsproj" />
     <ProjectReference Include="..\Finance.Repository\Finance.Repository.fsproj" />
   </ItemGroup>

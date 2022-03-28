@@ -20,7 +20,11 @@ let configureSettings (configurationBuilder: IConfigurationBuilder) =
 [<EntryPoint>]
 let main args =
     let builder = WebApplication.CreateBuilder(args)
-    builder.Logging.AddConsole() |> ignore
+    builder
+        .Logging
+        .ClearProviders()
+        .AddConsole() |> ignore
+
     let configurationBuilder = ConfigurationBuilder() |> configureSettings
     let settings = configurationBuilder.Build().Get<Settings>()
 

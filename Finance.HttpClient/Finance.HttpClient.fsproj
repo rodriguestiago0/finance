@@ -5,18 +5,16 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Model\Response\Nordigen.fs" />
+    <Compile Include="Model\Request\Nordigen.fs" />
     <Content Include="paket.references" />
     <Compile Include="Http.fs" />
-    <Compile Include="Nordigen\Records\Response\Authorization.fs" />
-    <Compile Include="Nordigen\Records\Response\EndUserAgreement.fs" />
-    <Compile Include="Nordigen\Records\Response\Requisition.fs" />
-    <Compile Include="Nordigen\Records\Response\Transaction.fs" />
-    <Compile Include="Nordigen\Records\Request\Requisition.fs" />
-    <Compile Include="Nordigen\Records\Request\Login.fs" />
-    <Compile Include="Nordigen\NordigenClient.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Client\NordigenClient.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

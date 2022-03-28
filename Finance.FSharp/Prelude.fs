@@ -56,12 +56,17 @@ module Strings =
     
     let trimEnd (trimChar: char) (s: string) =
         s.TrimEnd trimChar
-        
-    let isNullOrEmpty (s: string) =
-        String.IsNullOrEmpty(s)
 
-    let (|IsNotNullOrEmpty|_|) (str : string) =
-        if isNullOrEmpty str then
+    let (|NotWhiteSpace|_|) a =
+        if String.IsNullOrWhiteSpace a then None
+        else Some a
+
+    let (|NotEmptyOrWhiteSpace|_|) a =
+        if String.IsNullOrEmpty a || String.IsNullOrWhiteSpace a then None
+        else Some a
+
+    let (|NotNullOrEmpty|_|) (str : string) =
+        if String.IsNullOrEmpty str then
             None
         else Some str
 
@@ -74,7 +79,7 @@ module Decimal =
 
     let (|IsDecimalOptional|_|) (str : string) =
         match str with
-        | IsNotNullOrEmpty str ->
+        | NotNullOrEmpty str ->
             match Decimal.TryParse(str) with
             | true, d -> Some (Some d)
             | _ -> None
