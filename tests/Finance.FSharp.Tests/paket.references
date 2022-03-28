@@ -1,0 +1,8 @@
+﻿group Main
+    FSharp.Core
+    Fleece.SystemTextJson
+
+group Tests
+    NUnit
+    Microsoft.NET.Test.Sdk
+    NUnit3TestAdapter

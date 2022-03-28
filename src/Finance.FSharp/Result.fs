@@ -1,5 +1,8 @@
 ﻿namespace Finance.FSharp
 
+open Microsoft.FSharp.Core
+open Fleece
+
 [<RequireQualifiedAccess>]
 module Result =
     let traverse f xs =
@@ -30,3 +33,8 @@ module Result =
         | Ok _ -> ()
         | Error e -> f e
         res
+
+    let decodeError (f: 's -> Result<'a, DecodeError>) (res: Result<'a, 'b>) : Result<'a, DecodeError> =
+        match res with
+        | Ok x -> x |> Ok
+        | Error e -> f e

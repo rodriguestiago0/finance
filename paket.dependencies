@@ -13,4 +13,11 @@ group Main
     nuget Microsoft.Extensions.Hosting
     nuget Microsoft.Extensions.Logging
     nuget Microsoft.Extensions.Configuration.UserSecrets
-    nuget System.Runtime.Caching
+
+group Tests
+    source https://api.nuget.org/v3/index.json
+
+    nuget FSharp.Core
+    nuget Microsoft.NET.Test.Sdk
+    nuget NUnit
+    nuget NUnit3TestAdapter

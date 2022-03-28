@@ -5,16 +5,15 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Model\Response\Nordigen.fs" />
-    <Compile Include="Model\Request\Nordigen.fs" />
     <Content Include="paket.references" />
-    <Compile Include="Http.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Client\NordigenClient.fs" />
+    <Compile Include="Prelude.fs" />
+    <Compile Include="Result.fs" />
+    <Compile Include="Async.fs" />
+    <Compile Include="AsyncResult.fs" />
+    <Compile Include="Option.fs" />
+    <Compile Include="Json.fs" />
+    <Compile Include="Validator.fs" />
+    <Compile Include="Encryption.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

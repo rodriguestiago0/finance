@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Repository", "Finance.Repository\Finance.Repository.fsproj", "{8D3176AB-E1DF-4602-9B74-D6751DE50FBF}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Repository", "src\Finance.Repository\Finance.Repository.fsproj", "{8D3176AB-E1DF-4602-9B74-D6751DE50FBF}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Model", "Finance.Model\Finance.Model.fsproj", "{7FA6AFAB-BE53-4B7D-9C66-4923AE771230}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Model", "src\Finance.Model\Finance.Model.fsproj", "{7FA6AFAB-BE53-4B7D-9C66-4923AE771230}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Paket", "Paket", "{B990F38D-981D-4ED8-B4B2-F61EADBDD46E}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,15 +15,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{7641A8
 		Docker\postgres.yaml = Docker\postgres.yaml
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.FSharp", "Finance.FSharp\Finance.FSharp.fsproj", "{BE5A3AD9-3736-4CD9-98A6-72CC6398A667}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.FSharp", "src\Finance.FSharp\Finance.FSharp.fsproj", "{BE5A3AD9-3736-4CD9-98A6-72CC6398A667}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.HttpClient", "Finance.HttpClient\Finance.HttpClient.fsproj", "{90E03B45-A12D-47D5-8973-62F77BCA7847}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.HttpClient", "src\Finance.HttpClient\Finance.HttpClient.fsproj", "{90E03B45-A12D-47D5-8973-62F77BCA7847}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Api", "Finance.Api\Finance.Api.fsproj", "{552620E7-34DA-4606-AE7E-2A8F1F0AA052}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Api", "src\Finance.Api\Finance.Api.fsproj", "{552620E7-34DA-4606-AE7E-2A8F1F0AA052}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Service", "Finance.Service\Finance.Service.fsproj", "{EF3C3425-3712-4946-9625-289B71F73050}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Service", "src\Finance.Service\Finance.Service.fsproj", "{EF3C3425-3712-4946-9625-289B71F73050}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Application", "Finance.Application\Finance.Application.fsproj", "{2B453F8E-93D9-457A-883F-E5DE784055A2}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Application", "src\Finance.Application\Finance.Application.fsproj", "{2B453F8E-93D9-457A-883F-E5DE784055A2}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.FSharp.Tests", "tests\Finance.FSharp.Tests\Finance.FSharp.Tests.fsproj", "{0D2515C8-DE84-4F8F-88B6-08EA0F1F0419}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1D88B227-4AA8-4159-B165-26A34B8E04ED}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{CBA4A43D-C3BE-40A5-8B99-37B8EAD1A9A3}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Fsharp.Tests.Common", "tests\Finance.Fsharp.Tests.Common\Finance.Fsharp.Tests.Common.fsproj", "{1C419DA2-4B68-4BF6-89DA-79A149BF6A81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,5 +67,24 @@ Global
 		{2B453F8E-93D9-457A-883F-E5DE784055A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B453F8E-93D9-457A-883F-E5DE784055A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B453F8E-93D9-457A-883F-E5DE784055A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D2515C8-DE84-4F8F-88B6-08EA0F1F0419}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D2515C8-DE84-4F8F-88B6-08EA0F1F0419}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D2515C8-DE84-4F8F-88B6-08EA0F1F0419}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D2515C8-DE84-4F8F-88B6-08EA0F1F0419}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C419DA2-4B68-4BF6-89DA-79A149BF6A81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C419DA2-4B68-4BF6-89DA-79A149BF6A81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C419DA2-4B68-4BF6-89DA-79A149BF6A81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C419DA2-4B68-4BF6-89DA-79A149BF6A81}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0D2515C8-DE84-4F8F-88B6-08EA0F1F0419} = {1D88B227-4AA8-4159-B165-26A34B8E04ED}
+		{552620E7-34DA-4606-AE7E-2A8F1F0AA052} = {CBA4A43D-C3BE-40A5-8B99-37B8EAD1A9A3}
+		{2B453F8E-93D9-457A-883F-E5DE784055A2} = {CBA4A43D-C3BE-40A5-8B99-37B8EAD1A9A3}
+		{BE5A3AD9-3736-4CD9-98A6-72CC6398A667} = {CBA4A43D-C3BE-40A5-8B99-37B8EAD1A9A3}
+		{90E03B45-A12D-47D5-8973-62F77BCA7847} = {CBA4A43D-C3BE-40A5-8B99-37B8EAD1A9A3}
+		{7FA6AFAB-BE53-4B7D-9C66-4923AE771230} = {CBA4A43D-C3BE-40A5-8B99-37B8EAD1A9A3}
+		{8D3176AB-E1DF-4602-9B74-D6751DE50FBF} = {CBA4A43D-C3BE-40A5-8B99-37B8EAD1A9A3}
+		{EF3C3425-3712-4946-9625-289B71F73050} = {CBA4A43D-C3BE-40A5-8B99-37B8EAD1A9A3}
+		{1C419DA2-4B68-4BF6-89DA-79A149BF6A81} = {1D88B227-4AA8-4159-B165-26A34B8E04ED}
 	EndGlobalSection
 EndGlobal

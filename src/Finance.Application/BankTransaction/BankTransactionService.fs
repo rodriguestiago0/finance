@@ -9,7 +9,7 @@ module BankTransactionService =
     let importTransactions (context : BankTransactionContext) =
         let authorization =
             let request =
-                { Login.SecretId = context.SecretId
+                { LoginRequest.SecretId = context.SecretId
                   SecretKey = context.SecretKey }
             NordigenClient.login request
 
