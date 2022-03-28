@@ -12,5 +12,5 @@
     <ProjectReference Include="..\Finance.Fsharp.Tests.Common\Finance.Fsharp.Tests.Common.fsproj" />
     <ProjectReference Include="..\..\src\Finance.FSharp\Finance.FSharp.fsproj" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

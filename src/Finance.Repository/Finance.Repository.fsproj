@@ -22,5 +22,5 @@
     <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />
     <ProjectReference Include="..\Finance.Model\Finance.Model.fsproj" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

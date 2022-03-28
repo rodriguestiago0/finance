@@ -5,10 +5,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="paket.references" />
     <Compile Include="Model\Nordigen.fs" />
     <Compile Include="Model\Response\Nordigen.fs" />
     <Compile Include="Model\Request\Nordigen.fs" />
-    <Content Include="paket.references" />
     <Compile Include="Http.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -17,5 +17,5 @@
   <ItemGroup>
     <Compile Include="Client\NordigenClient.fs" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -15,5 +15,5 @@
     <Compile Include="Validator.fs" />
     <Compile Include="Encryption.fs" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -8,9 +8,8 @@ open Finance.HttpClient.Client
 module BankTransactionService =
     let importTransactions (context : BankTransactionContext) =
         let authorization =
-            let request =
-                { LoginRequest.SecretId = context.SecretId
-                  SecretKey = context.SecretKey }
-            NordigenClient.login request
+            { LoginRequest.SecretId = context.SecretId
+              SecretKey = context.SecretKey }
+            //NordigenClient.login request
 
         AsyncResult.retn()

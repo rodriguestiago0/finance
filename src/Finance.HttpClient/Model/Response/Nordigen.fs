@@ -83,14 +83,14 @@ module Nordigen =
                         return
                             { Id = id
                               CreatedAt = createdAt
-                              Redirect = redirect
+                              Redirect = Uri(redirect)
                               Status = status
                               InstitutionId = institutionId
                               Agreement  = agreement
                               Reference = reference
                               Accounts = accounts
                               UserLanguage = userLanguage
-                              Link = link }
+                              Link = Uri(link) }
                     }
                 | x -> Decode.Fail.objExpected x
 
