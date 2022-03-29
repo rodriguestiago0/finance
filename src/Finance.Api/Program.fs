@@ -16,7 +16,10 @@ open Microsoft.Extensions.Logging
 let configureSettings (configurationBuilder: IConfigurationBuilder) =
     configurationBuilder.SetBasePath(AppContext.BaseDirectory)
                         .AddJsonFile("appsettings.json", false)
-
+type XPTO = {
+    A : int
+    B : Option<int>
+}
 [<EntryPoint>]
 let main args =
     let builder = WebApplication.CreateBuilder(args)
@@ -33,6 +36,7 @@ let main args =
     let tickerContext = TickerContext.create settings.SqlConnectionString
     let brokerContext = BrokerContext.create settings.SqlConnectionString
     let transactionContext = ApiTransactionContext.create settings.SqlConnectionString
+
     let services = builder.Services
 
     services.AddHttpLogging(fun logging -> logging.LoggingFields <- HttpLoggingFields.Request )

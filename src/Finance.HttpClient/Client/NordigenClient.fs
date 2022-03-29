@@ -2,17 +2,19 @@
 
 open System
 open System.Net.Http
-open Fleece.SystemTextJson
 open Finance.FSharp
 open Finance.HttpClient
 open Finance.HttpClient.Http.Response
 open Finance.HttpClient.Model.Request.Nordigen
 open Finance.HttpClient.Model.Response.Nordigen
+open Fleece.SystemTextJson
 open Microsoft.FSharp.Core
 
 [<RequireQualifiedAccess>]
 module NordigenClient =
-    let [<Literal>] BaseUrl = "https://ob.nordigen.com/api/v2/"
+    let [<Literal>] baseUrl = "https://ob.nordigen.com/api/v2/"
+
+    let private nordigenUri = Uri(baseUrl)
 
     type Credential = {
         Access : string
@@ -28,98 +30,87 @@ module NordigenClient =
 
     let private lockObj = obj()
 
-    let private loginAction (login : LoginRequest) =
-        let headers =
-            let contentType =
-                { ContentType.``type`` = "application"
-                  subtype = "json"
-                  charset = None
-                  boundary = None }
-            seq {
-                yield "application/json" |> RequestHeader.Accept
-                yield contentType |> RequestHeader.ContentType }
-
-        let requestBody =
-            (login
-             |> toJson
-             |> string
-             |> RequestBody.BodyString)
-
-        let handler (response : HttpResponseMessage) =
-            let processResponse : AsyncResult<Authorization, exn> =
-                response
-                |> toResult
-            processResponse
-            |> AsyncResult.map(fun auth ->
-                let accessExpiresAt = auth.AccessExpires - 60
-                let refreshExpiresAt = auth.RefreshExpires - 60
-                let now = DateTimeOffset.UtcNow
-                { Credential.Access = auth.Access
-                  AccessExpiresAt = now.AddSeconds(accessExpiresAt)
-                  Refresh = auth.Refresh
-                  RefreshExpiresAt = now.AddSeconds(refreshExpiresAt) })
-
-        httpResponse {
-            baseAddress (Uri(BaseUrl))
-            method Method.Post
-            path "token/new/"
-            requestHeaders headers
-            body requestBody
-            responseHandler handler
-        }
-
-    let private refreshAction (login : LoginRequest) =
-        let headers =
-            let contentType =
-                { ContentType.``type`` = "application"
-                  subtype = "json"
-                  charset = None
-                  boundary = None }
-            seq {
-                yield "application/json" |> RequestHeader.Accept
-                yield contentType |> RequestHeader.ContentType }
-
-        let requestBody =
-            login
-            |> toJson
-            |> string
-            |> RequestBody.BodyString
-
-        let handler (response : HttpResponseMessage) =
-            let processResponse : AsyncResult<Authorization, exn> =
-                response
-                |> toResult
-            processResponse
-            |> AsyncResult.map(fun auth ->
-                let accessExpiresAt = auth.AccessExpires - 60
-                let refreshExpiresAt = auth.RefreshExpires - 60
-                let now = DateTimeOffset.UtcNow
-                { Credential.Access = auth.Access
-                  AccessExpiresAt = now.AddSeconds(accessExpiresAt)
-                  Refresh = auth.Refresh
-                  RefreshExpiresAt = now.AddSeconds(refreshExpiresAt) })
-
-        httpResponse {
-            baseAddress (Uri(BaseUrl))
-            method Method.Post
-            path "token/refresh/"
-            requestHeaders headers
-            body requestBody
-            responseHandler handler
-        }
-
     let (|IsValid|_|) (credential : Credential) =
-        Some credential
+        if credential.RefreshExpiresAt > DateTimeOffset.UtcNow then
+            Some credential
+        else None
 
     let (|ExpiredToken|_|) (credential : Credential) =
-        if credential.RefreshExpiresAt > DateTimeOffset.UtcNow then
+        if credential.RefreshExpiresAt <= DateTimeOffset.UtcNow then
             Some()
         else None
 
     let (|ExpiredRefresh|_|) (credential : Credential) =
-        if credential.AccessExpiresAt > DateTimeOffset.UtcNow then
+        if credential.AccessExpiresAt <= DateTimeOffset.UtcNow then
             Some()
         else None
+
+    let private contentType =
+        { ContentType.``type`` = "application"
+          subtype = "json"
+          charset = None
+          boundary = None }
+
+    let private basicHeaders =
+        seq {
+            yield "application/json" |> RequestHeader.Accept
+            yield contentType |> RequestHeader.ContentType }
+
+    let inline private buildBody body =
+        body
+        |> toJson
+        |> string
+        |> RequestBody.BodyString
+
+    let inline private handler (response : HttpResponseMessage) =
+        response
+        |> toResult
+
+    let private loginAction (login : LoginRequest) =
+        let handler (response : HttpResponseMessage) =
+            let processResponse : AsyncResult<Authorization, exn> =
+                response
+                |> toResult
+            processResponse
+            |> AsyncResult.map(fun auth ->
+                let accessExpiresAt = auth.AccessExpires - 60
+                let refreshExpiresAt = auth.RefreshExpires - 60
+                let now = DateTimeOffset.UtcNow
+                { Credential.Access = auth.Access
+                  AccessExpiresAt = now.AddSeconds(accessExpiresAt)
+                  Refresh = auth.Refresh
+                  RefreshExpiresAt = now.AddSeconds(refreshExpiresAt) })
+
+        httpResponse {
+            baseAddress nordigenUri
+            method Method.Post
+            path "token/new/"
+            requestHeaders basicHeaders
+            body (buildBody login)
+            responseHandler handler }
+
+    let private refreshAction (refresh : RefreshRequest) =
+        let handler (response : HttpResponseMessage) =
+            let processResponse : AsyncResult<Authorization, exn> =
+                response
+                |> toResult
+            processResponse
+            |> AsyncResult.map(fun auth ->
+                let accessExpiresAt = auth.AccessExpires - 60
+                let refreshExpiresAt = auth.RefreshExpires - 60
+                let now = DateTimeOffset.UtcNow
+                { Credential.Access = auth.Access
+                  AccessExpiresAt = now.AddSeconds(accessExpiresAt)
+                  Refresh = auth.Refresh
+                  RefreshExpiresAt = now.AddSeconds(refreshExpiresAt) })
+
+        httpResponse {
+            baseAddress nordigenUri
+            method Method.Post
+            path "token/refresh/"
+            requestHeaders basicHeaders
+            body (buildBody refresh)
+            responseHandler handler }
 
     type Credential with
         static member BearerToken login =
@@ -131,7 +122,7 @@ module NordigenClient =
                     | ExpiredRefresh _ ->
                         loginAction login
                     | ExpiredToken _ ->
-                        refreshAction login
+                        refreshAction { RefreshRequest.Refresh = credential.Refresh }
                     | _ -> "Invalid Credential" |> exn |> AsyncResult.error
 
                 let currentAuthentication =
@@ -142,160 +133,148 @@ module NordigenClient =
             lock lockObj getOrUpdateAuthentication
             |> AsyncResult.map(fun a -> a.Access)
 
-
-    let listBanks (login : LoginRequest) (country : Option<string>) =
+    let private headersWithAuthentication login =
         let mkHeaders bearerToken  =
-            let contentType =
-                { ContentType.``type`` = "application"
-                  subtype = "json"
-                  charset = None
-                  boundary = None }
             seq {
-                yield "application/json" |> RequestHeader.Accept
-                yield bearerToken |> RequestHeader.Authorization
-                yield contentType |> RequestHeader.ContentType }
+                yield! basicHeaders
+                yield bearerToken |> RequestHeader.Authorization }
 
-        let handler (response : HttpResponseMessage) =
-            let processResponse : AsyncResult<Institution[], exn> =
-                response
-                |> toResult
-            processResponse
+        Credential.BearerToken login
+            |> AsyncResult.map mkHeaders
 
+    let getInstitutions (login : LoginRequest)  (country : Option<string>) : AsyncResult<Institution[], exn> =
         let query =
             match country with
             | Some s ->
                 ("country", s) |> Seq.singleton
             | None -> Seq.empty
 
-        let headers =
-            Credential.BearerToken login
-            |> AsyncResult.map mkHeaders
-
         let mk headers =
             httpResponse {
-                baseAddress (Uri(BaseUrl))
+                baseAddress nordigenUri
                 method Method.Post
                 path "institutions/?country=gb"
                 queries query
                 requestHeaders headers
-                responseHandler handler
-            }
+                responseHandler handler }
 
-        headers
+        headersWithAuthentication login
         |> AsyncResult.bind mk
 
-    let createEndUserAgreement (login : LoginRequest) (endUserAgreement : EndUserAgreementRequest) =
-        let mkHeaders bearerToken  =
-            let contentType =
-                { ContentType.``type`` = "application"
-                  subtype = "json"
-                  charset = None
-                  boundary = None }
-            seq {
-                yield "application/json" |> RequestHeader.Accept
-                yield bearerToken |> RequestHeader.Authorization
-                yield contentType |> RequestHeader.ContentType }
-
-        let handler (response : HttpResponseMessage) =
-            let processResponse : AsyncResult<EndUserAgreement, exn> =
-                response
-                |> toResult
-            processResponse
-
-        let headers =
-            Credential.BearerToken login
-            |> AsyncResult.map mkHeaders
-
-        let requestBody =
-            endUserAgreement
-            |> toJson
-            |> string
-            |> RequestBody.BodyString
-
+    let getInstitution (login : LoginRequest)  (institutionId : Guid) : AsyncResult<Institution, exn> =
         let mk headers =
             httpResponse {
-                baseAddress (Uri(BaseUrl))
+                baseAddress nordigenUri
+                method Method.Post
+                path $"institutions/{institutionId}/"
+                requestHeaders headers
+                responseHandler handler }
+
+        headersWithAuthentication login
+        |> AsyncResult.bind mk
+
+    let createAgreement (login : LoginRequest) (endUserAgreement : EndUserAgreementRequest) : AsyncResult<EndUserAgreement, exn> =
+        let mk headers =
+            httpResponse {
+                baseAddress nordigenUri
                 method Method.Post
                 path "agreements/enduser/"
-                body requestBody
+                body (buildBody endUserAgreement)
                 requestHeaders headers
-                responseHandler handler
-            }
+                responseHandler handler }
 
-        headers
+        headersWithAuthentication login
         |> AsyncResult.bind mk
 
-    let createRequisition (login : LoginRequest) (requisition : RequisitionRequest) =
-        let mkHeaders bearerToken  =
-            let contentType =
-                { ContentType.``type`` = "application"
-                  subtype = "json"
-                  charset = None
-                  boundary = None }
-            seq {
-                yield "application/json" |> RequestHeader.Accept
-                yield bearerToken |> RequestHeader.Authorization
-                yield contentType |> RequestHeader.ContentType }
+    let getAgreements (login : LoginRequest): AsyncResult<EndUserAgreement[], exn> =
+        let mk headers =
+            httpResponse {
+                baseAddress nordigenUri
+                method Method.Get
+                path "agreements/enduser/"
+                requestHeaders headers
+                responseHandler handler }
 
+        headersWithAuthentication login
+        |> AsyncResult.bind mk
+
+    let getAgreement (login : LoginRequest) (agreementId : Guid) : AsyncResult<EndUserAgreement, exn> =
+        let mk headers =
+            httpResponse {
+                baseAddress nordigenUri
+                method Method.Get
+                path $"agreements/enduser/{agreementId}/"
+                requestHeaders headers
+                responseHandler handler }
+
+        headersWithAuthentication login
+        |> AsyncResult.bind mk
+
+    let deleteAgreement (login : LoginRequest) (agreementId : Guid) : AsyncResult<unit, exn> =
         let handler (response : HttpResponseMessage) =
-            let processResponse : AsyncResult<EndUserAgreement, exn> =
-                response
-                |> toResult
-            processResponse
-
-        let headers =
-            Credential.BearerToken login
-            |> AsyncResult.map mkHeaders
-
-        let requestBody =
-            requisition
-            |> toJson
-            |> string
-            |> RequestBody.BodyString
+            response
+            |> toEmptyResult
 
         let mk headers =
             httpResponse {
-                baseAddress (Uri(BaseUrl))
+                baseAddress nordigenUri
+                method Method.Delete
+                path $"agreements/enduser/{agreementId}/"
+                requestHeaders headers
+                responseHandler handler }
+
+        headersWithAuthentication login
+        |> AsyncResult.bind mk
+
+    let createRequisition (login : LoginRequest) (requisition : RequisitionRequest) : AsyncResult<EndUserAgreement, exn> =
+        let mk headers =
+            httpResponse {
+                baseAddress nordigenUri
                 method Method.Post
                 path "requisitions/"
-                body requestBody
+                body (buildBody requisition)
                 requestHeaders headers
-                responseHandler handler
-            }
+                responseHandler handler }
 
-        headers
+        headersWithAuthentication login
         |> AsyncResult.bind mk
 
-    let requisition (login : LoginRequest) (requisitionId : Guid) =
-        let mkHeaders bearerToken  =
-            let contentType =
-                { ContentType.``type`` = "application"
-                  subtype = "json"
-                  charset = None
-                  boundary = None }
-            seq {
-                yield "application/json" |> RequestHeader.Accept
-                yield bearerToken |> RequestHeader.Authorization
-                yield contentType |> RequestHeader.ContentType }
+    let getRequisition (login : LoginRequest) (requisitionId : Guid) : AsyncResult<Requisition, exn> =
+        let mk headers =
+            httpResponse {
+                baseAddress nordigenUri
+                method Method.Get
+                path $"requisitions/{requisitionId}/"
+                requestHeaders headers
+                responseHandler handler }
 
+        headersWithAuthentication login
+        |> AsyncResult.bind mk
+
+    let deleteRequisition (login : LoginRequest) (requisitionId : Guid) : AsyncResult<unit, exn> =
         let handler (response : HttpResponseMessage) =
-            let processResponse : AsyncResult<Requisition, exn> =
-                response
-                |> toResult
-            processResponse
-
-        let headers =
-            Credential.BearerToken login
-            |> AsyncResult.map mkHeaders
+            response
+            |> toEmptyResult
 
         let mk headers =
             httpResponse {
-                baseAddress (Uri(BaseUrl))
-                method Method.Post
-                path $"requisitions/{requisitionId}"
+                baseAddress nordigenUri
+                method Method.Delete
+                path $"requisitions/{requisitionId}/"
                 requestHeaders headers
-                responseHandler handler
-            }
+                responseHandler handler }
 
-        headers
+        headersWithAuthentication login
+        |> AsyncResult.bind mk
+
+    let getRequisitions (login : LoginRequest) : AsyncResult<Requisition[], exn> =
+        let mk headers =
+            httpResponse {
+                baseAddress nordigenUri
+                method Method.Get
+                path $"requisitions/"
+                requestHeaders headers
+                responseHandler handler }
+
+        headersWithAuthentication login
         |> AsyncResult.bind mk

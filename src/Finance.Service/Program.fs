@@ -7,7 +7,6 @@ open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
-open Microsoft.Extensions.Configuration.UserSecrets
 
 
 [<EntryPoint>]

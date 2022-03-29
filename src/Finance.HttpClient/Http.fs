@@ -206,4 +206,15 @@ module Http =
                 |> AsyncResult.map exn
                 |> Async.map (function
                     | Ok e -> e |> Error
-                      | Error e -> Error e)
+                    | Error e -> Error e)
+
+        let inline toEmptyResult (response: HttpResponseMessage) =
+            let body = asString response
+            if response.IsSuccessStatusCode then
+                AsyncResult.retn ()
+            else
+                body
+                |> AsyncResult.map exn
+                |> Async.map (function
+                    | Ok e -> e |> Error
+                    | Error e -> Error e)

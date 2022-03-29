@@ -2,7 +2,6 @@
 
 open Finance.FSharp
 open Finance.HttpClient.Model.Request.Nordigen
-open Finance.HttpClient.Client
 
 [<RequireQualifiedAccess>]
 module BankTransactionService =

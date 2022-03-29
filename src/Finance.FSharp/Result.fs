@@ -34,7 +34,7 @@ module Result =
         | Error e -> f e
         res
 
-    let decodeError (f: 's -> Result<'a, DecodeError>) (res: Result<'a, 'b>) : Result<'a, DecodeError> =
+    let decodeError (f: 'b -> Result<'a, DecodeError>) (res: Result<'a, 'b>) : Result<'a, DecodeError> =
         match res with
         | Ok x -> x |> Ok
         | Error e -> f e
