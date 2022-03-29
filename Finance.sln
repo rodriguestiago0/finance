@@ -27,9 +27,9 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Application", "src\
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.FSharp.Tests", "tests\Finance.FSharp.Tests\Finance.FSharp.Tests.fsproj", "{0D2515C8-DE84-4F8F-88B6-08EA0F1F0419}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1D88B227-4AA8-4159-B165-26A34B8E04ED}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{1D88B227-4AA8-4159-B165-26A34B8E04ED}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{CBA4A43D-C3BE-40A5-8B99-37B8EAD1A9A3}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CBA4A43D-C3BE-40A5-8B99-37B8EAD1A9A3}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Finance.Fsharp.Tests.Common", "tests\Finance.Fsharp.Tests.Common\Finance.Fsharp.Tests.Common.fsproj", "{1C419DA2-4B68-4BF6-89DA-79A149BF6A81}"
 EndProject
