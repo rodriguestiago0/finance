@@ -38,3 +38,8 @@ module Result =
         match res with
         | Ok x -> x |> Ok
         | Error e -> f e
+
+    let ofTry (error:'b) (res: bool*'a) : Result<'a, 'b> =
+        match res with
+        | true, res -> Ok res
+        | false, _ -> Error error

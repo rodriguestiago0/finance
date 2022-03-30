@@ -15,6 +15,7 @@
     <Compile Include="Transaction\TransactionService.fs" />
     <Compile Include="Dividend\DividendContext.fs" />
     <Compile Include="BankTransaction\BankTransactionContext.fs" />
+    <Compile Include="BankTransaction\ApiBankTransactionContext.fs" />
     <Compile Include="BankTransaction\BankTransactionService.fs" />
   </ItemGroup>
   <ItemGroup>

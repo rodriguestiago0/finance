@@ -129,13 +129,13 @@ module Nordigen =
                     }
                 | x -> Decode.Fail.objExpected x
 
-    type Institution = {
-            Id : string
-            Name : string
-            BIC : string
-            TransactionTotalDays : int
-            Countries : string[]
-            Logo : string }
+    type Institution =
+        { Id : string
+          Name : string
+          BIC : string
+          TransactionTotalDays : int
+          Countries : string[]
+          Logo : string }
         with
         static member OfJson json =
                 match json with
@@ -152,17 +152,17 @@ module Nordigen =
                             { Id = id
                               Name = name
                               BIC = bic
-                              TransactionTotalDays = transactionTotalDays
+                              TransactionTotalDays = transactionTotalDays |> parseToInt
                               Countries = countries
                               Logo  = logo }
                     }
                 | x -> Decode.Fail.objExpected x
 
-    type Authorization = {
-        Access : string
-        AccessExpires : int
-        Refresh : string
-        RefreshExpires : int }
+    type Authorization =
+        { Access : string
+          AccessExpires : int
+          Refresh : string
+          RefreshExpires : int }
         with
         static member OfJson json =
                 match json with
@@ -178,5 +178,22 @@ module Nordigen =
                               AccessExpires = accessExpires
                               Refresh = refresh
                               RefreshExpires = refreshExpires }
+                    }
+                | x -> Decode.Fail.objExpected x
+
+    type RefreshAuthorization =
+        { Access : string
+          AccessExpires : int }
+        with
+        static member OfJson json =
+                match json with
+                | JObject o ->
+                    monad {
+                        let! access = o .@ "access"
+                        let! accessExpires = o .@ "access_expires"
+
+                        return
+                            { Access = access
+                              AccessExpires = accessExpires }
                     }
                 | x -> Decode.Fail.objExpected x

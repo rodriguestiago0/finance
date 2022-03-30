@@ -70,6 +70,9 @@ module Strings =
             None
         else Some str
 
+    let parseToInt (str : string) =
+        str |> int
+
 [<AutoOpen>]
 module Decimal =
     let (|IsDecimal|_|) (str : string) =

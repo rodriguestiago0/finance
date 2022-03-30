@@ -4,23 +4,21 @@ open System
 open System.Threading.Tasks
 open FSharp.Core
 open Finance.Api.Helpers
-open Finance.Api.Models
+open Finance.Application.BankTransaction
 open Finance.Application.Degiro
 open Finance.Application.Transaction
 open Finance.FSharp
-open Finance.Model.Investment
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
 
 [<RequireQualifiedAccess>]
-module Transaction =
+module Bank =
 
-    let private getTransactionByBrokerId (transactionContext : ApiTransactionContext) (id : Guid) =
+    let private getBanks (bankContext : ApiBankTransactionContext) (countryISO : Option<string>) =
         task{
             return!
-                BrokerId id
-                |> transactionContext.FetchTransactionByBrokerId
-                |> AsyncResult.map (List.map TransactionDto.ofDomain)
+                bankContext.FetchBanks countryISO
+                //|> AsyncResult.map (List.map TransactionDto.ofDomain)
                 |> IResults.ok
         }
         
@@ -52,8 +50,7 @@ module Transaction =
                 let processForms (forms : seq<IFormFile>) =
                     forms
                     |> Seq.map(fun form ->
-                        use stream = form.OpenReadStream()
-                        stream
+                        form.OpenReadStream()
                         |> Degiro.importCSV degiroContext externalBrokerId)
                     |> AsyncResult.sequence
 
@@ -63,13 +60,8 @@ module Transaction =
                     |> AsyncResult.bind processForms
                     |> IResults.ok
         }
-
-
     
-    let registerEndpoint (app : WebApplication) (transactionContext : ApiTransactionContext) (degiroContext : DegiroContext) =
+    let registerEndpoint (app : WebApplication) (bankContext : ApiBankTransactionContext) =
 
-        app.MapPost("/api/brokers/{id}/transactions", Func<Guid,HttpRequest,Task<IResult>> (fun id request -> uploadFile degiroContext id request))
-           .Accepts<IFormFile>("multipart/form-data")
-           .WithTags("Transactions") |> ignore
-        app.MapGet("/api/brokers/{id}/transactions", Func<Guid,Task<IResult>>(fun id -> getTransactionByBrokerId transactionContext id))
-           .WithTags("Transactions") |> ignore
+        app.MapGet("/api/banks", Func<string, Task<IResult>>(fun countryISO -> getBanks bankContext (countryISO |> Option.ofString)))
+           .WithTags("Banks") |> ignore

@@ -18,6 +18,16 @@ module Option =
     let lift2 f a b =
         apply (Option.map f a) b
 
+    let ofTry (res: bool*'a) =
+        match res with
+        | true, res -> Some res
+        | false, _ -> None
+
+    let toResult error a =
+        match a with
+        | Some r -> Ok r
+        | None -> Error error
+
     module Operators =
         let (<!>) = Option.map
         let (<*>) = apply

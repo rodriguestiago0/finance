@@ -12,15 +12,19 @@ open Microsoft.FSharp.Core
 
 [<RequireQualifiedAccess>]
 module NordigenClient =
-    let [<Literal>] baseUrl = "https://ob.nordigen.com/api/v2/"
+    let [<Literal>] private baseUrl = "https://ob.nordigen.com/api/v2/"
 
     let private nordigenUri = Uri(baseUrl)
 
-    type Credential = {
-        Access : string
-        AccessExpiresAt : DateTimeOffset
-        Refresh : string
-        RefreshExpiresAt : DateTimeOffset }
+    type Credential =
+        { Access : string
+          AccessExpiresAt : DateTimeOffset
+          Refresh : string
+          RefreshExpiresAt : DateTimeOffset }
+
+    type RefreshCredential =
+        { Access : string
+          AccessExpiresAt : DateTimeOffset }
 
     let mutable private Authentication =
         { Credential.Access = String.Empty
@@ -36,12 +40,12 @@ module NordigenClient =
         else None
 
     let (|ExpiredToken|_|) (credential : Credential) =
-        if credential.RefreshExpiresAt <= DateTimeOffset.UtcNow then
+        if credential.AccessExpiresAt <= DateTimeOffset.UtcNow then
             Some()
         else None
 
     let (|ExpiredRefresh|_|) (credential : Credential) =
-        if credential.AccessExpiresAt <= DateTimeOffset.UtcNow then
+        if credential.RefreshExpiresAt <= DateTimeOffset.UtcNow then
             Some()
         else None
 
@@ -91,18 +95,15 @@ module NordigenClient =
 
     let private refreshAction (refresh : RefreshRequest) =
         let handler (response : HttpResponseMessage) =
-            let processResponse : AsyncResult<Authorization, exn> =
+            let processResponse : AsyncResult<RefreshAuthorization, exn> =
                 response
                 |> toResult
             processResponse
             |> AsyncResult.map(fun auth ->
                 let accessExpiresAt = auth.AccessExpires - 60
-                let refreshExpiresAt = auth.RefreshExpires - 60
                 let now = DateTimeOffset.UtcNow
-                { Credential.Access = auth.Access
-                  AccessExpiresAt = now.AddSeconds(accessExpiresAt)
-                  Refresh = auth.Refresh
-                  RefreshExpiresAt = now.AddSeconds(refreshExpiresAt) })
+                { RefreshCredential.Access = auth.Access
+                  AccessExpiresAt = now.AddSeconds(accessExpiresAt) })
 
         httpResponse {
             baseAddress nordigenUri
@@ -123,6 +124,10 @@ module NordigenClient =
                         loginAction login
                     | ExpiredToken _ ->
                         refreshAction { RefreshRequest.Refresh = credential.Refresh }
+                        |> AsyncResult.map(fun r ->
+                            { credential with
+                                Access = r.Access
+                                AccessExpiresAt = r.AccessExpiresAt })
                     | _ -> "Invalid Credential" |> exn |> AsyncResult.error
 
                 let currentAuthentication =
@@ -131,16 +136,16 @@ module NordigenClient =
                 Authentication <- currentAuthentication
                 Authentication
             lock lockObj getOrUpdateAuthentication
-            |> AsyncResult.map(fun a -> a.Access)
+            |> AsyncResult.map(fun a -> $"Bearer {a.Access}")
 
     let private headersWithAuthentication login =
         let mkHeaders bearerToken  =
             seq {
-                yield! basicHeaders
-                yield bearerToken |> RequestHeader.Authorization }
+                yield bearerToken |> RequestHeader.Authorization
+                yield! basicHeaders }
 
         Credential.BearerToken login
-            |> AsyncResult.map mkHeaders
+        |> AsyncResult.map mkHeaders
 
     let getInstitutions (login : LoginRequest)  (country : Option<string>) : AsyncResult<Institution[], exn> =
         let query =
@@ -152,8 +157,8 @@ module NordigenClient =
         let mk headers =
             httpResponse {
                 baseAddress nordigenUri
-                method Method.Post
-                path "institutions/?country=gb"
+                method Method.Get
+                path "institutions/"
                 queries query
                 requestHeaders headers
                 responseHandler handler }
@@ -165,7 +170,7 @@ module NordigenClient =
         let mk headers =
             httpResponse {
                 baseAddress nordigenUri
-                method Method.Post
+                method Method.Get
                 path $"institutions/{institutionId}/"
                 requestHeaders headers
                 responseHandler handler }

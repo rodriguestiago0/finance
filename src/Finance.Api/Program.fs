@@ -6,6 +6,7 @@ open Finance.Application.Degiro
 open Finance.Application.Dividend
 open Finance.Application.Ticker
 open Finance.Application.Transaction
+open Finance.Application.BankTransaction
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.HttpLogging
 open Microsoft.Extensions.Hosting
@@ -16,10 +17,7 @@ open Microsoft.Extensions.Logging
 let configureSettings (configurationBuilder: IConfigurationBuilder) =
     configurationBuilder.SetBasePath(AppContext.BaseDirectory)
                         .AddJsonFile("appsettings.json", false)
-type XPTO = {
-    A : int
-    B : Option<int>
-}
+                        .AddUserSecrets<Settings>()
 [<EntryPoint>]
 let main args =
     let builder = WebApplication.CreateBuilder(args)
@@ -36,6 +34,7 @@ let main args =
     let tickerContext = TickerContext.create settings.SqlConnectionString
     let brokerContext = BrokerContext.create settings.SqlConnectionString
     let transactionContext = ApiTransactionContext.create settings.SqlConnectionString
+    let bankContext = ApiBankTransactionContext.create settings.SqlConnectionString settings.SecretId settings.SecretKey
 
     let services = builder.Services
 
@@ -58,6 +57,7 @@ let main args =
     Broker.registerEndpoint app brokerContext
     Transaction.registerEndpoint app transactionContext degiroContext
     Dividend.registerEndpoint app dividendContext
+    Bank.registerEndpoint app bankContext
 
     if app.Environment.IsDevelopment() then
         app.UseSwagger()
