@@ -25,7 +25,7 @@ module CloseTransactionsRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.executeTransactionAsync [ "INSERT INTO
-                            Closed_Transaction (buy_transaction_id, sell_transaction_id, units)
+                            finance.closed_Transaction (buy_transaction_id, sell_transaction_id, units)
                             VALUES (@buyTransactionId, @sellTransactionId, @units)", data]
                     |> Async.AwaitTask
                 return Ok (List.sum result)

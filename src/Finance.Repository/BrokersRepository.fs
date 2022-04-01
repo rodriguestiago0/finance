@@ -1,9 +1,9 @@
 ﻿namespace Finance.Repository
 
 open FSharpPlus
-open Finance.FSharp
 open Microsoft.FSharp.Core
 open Npgsql.FSharp
+open Finance.FSharp
 open Finance.Model.Investment
 open Finance.Repository.Models
 
@@ -18,7 +18,7 @@ module BrokersRepository =
     let getBrokers connectionString : AsyncResult<List<Broker>, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM broker"
+        |> Sql.query "SELECT * FROM finance.broker"
         |> Sql.executeAsync BrokerDto.ofRowReader
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map BrokerDto.toDomain)
@@ -26,7 +26,7 @@ module BrokersRepository =
     let getByName connectionString (name : string) : AsyncResult<Broker, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM broker WHERE name = @name"
+        |> Sql.query "SELECT * FROM finance.broker WHERE name = @name"
         |> Sql.parameters [ "@name", Sql.string name]
         |> Sql.executeRowAsync BrokerDto.ofRowReader
         |> AsyncResult.ofTask 
@@ -36,7 +36,7 @@ module BrokersRepository =
     let getById connectionString (id : BrokerId) : AsyncResult<Broker, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM broker WHERE broker_id = @brokerId"
+        |> Sql.query "SELECT * FROM finance.broker WHERE broker_id = @brokerId"
         |> Sql.parameters [ "@brokerId", Sql.uuid (deconstruct id)]
         |> Sql.executeRowAsync BrokerDto.ofRowReader
         |> AsyncResult.ofTask
@@ -54,7 +54,7 @@ module BrokersRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
-                            broker (name, country_id)
+                            finance.broker (name, country_id)
                             VALUES (@name, @countryId)
                             RETURNING *"
                     |> Sql.parameters [ ("@name", Sql.string brokerDto.Name)

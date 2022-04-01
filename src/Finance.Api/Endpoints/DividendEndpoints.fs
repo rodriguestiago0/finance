@@ -45,8 +45,8 @@ module Dividend =
         
     let registerEndpoint (app : WebApplication) (dividendContext : DividendContext) =
         app.MapPost("/api/tickers/{tickerId}/dividends", Func<Guid, DividendDto, Task<IResult>>(fun tickerId dto -> createDividends dividendContext tickerId dto))
-           .WithTags("Tickers") |> ignore
+            .WithTags("Tickers") |> ignore
         app.MapGet("/api/tickers/{tickerId}/dividends", Func<Guid, Task<IResult>>(fun tickerId -> getDividendsByTicketId dividendContext tickerId))
-           .WithTags("Tickers") |> ignore
+            .WithTags("Tickers") |> ignore
         app.MapGet("/api/dividends/{dividendId}", Func<Guid, Task<IResult>>(fun dividendId -> getDividendsById dividendContext dividendId ))
-           .WithTags("Tickers") |> ignore
+            .WithTags("Tickers") |> ignore

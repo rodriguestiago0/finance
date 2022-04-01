@@ -20,17 +20,16 @@ module Authentication =
     let private authenticate (authenticationContext : AuthenticationContext) (login : LoginDto) =
         task{
             let mkToken (user : User) =
-                let claims = [|
-                    Claim(JwtRegisteredClaimNames.Sub, (deconstruct user.Username));
-                    Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                |]
+                let claims =
+                    [| Claim(JwtRegisteredClaimNames.Sub, (deconstruct user.Username))
+                       Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) |]
                 let expires = Nullable(DateTime.UtcNow.AddHours(8.0))
                 let notBefore = Nullable(DateTime.UtcNow)
                 let secret =
                     authenticationContext.Key
                     |> encodingGetBytes
                     |> SymmetricSecurityKey
-                let signingCredentials = SigningCredentials(key = secret, algorithm = SecurityAlgorithms.Sha512)
+                let signingCredentials = SigningCredentials(key = secret, algorithm = SecurityAlgorithms.HmacSha512)
 
                 let token =
                     JwtSecurityToken(
@@ -49,5 +48,6 @@ module Authentication =
         }
 
     let registerEndpoint (app : WebApplication) (authenticationContext : AuthenticationContext) =
-        app.MapGet("/api/login", Func<LoginDto, Task<IResult>>(fun login -> authenticate authenticationContext login))
-           .WithTags("Authentication") |> ignore
+        app.MapPost("/api/login", Func<LoginDto, Task<IResult>>(fun login -> authenticate authenticationContext login))
+            .AllowAnonymous()
+            .WithTags("Authentication") |> ignore

@@ -1,4 +1,4 @@
-create table if not exists broker
+create table if not exists finance.broker
 (
     broker_id  uuid default gen_random_uuid() not null
         constraint broker_pk
@@ -6,6 +6,3 @@ create table if not exists broker
     name       varchar                        not null,
     country_id integer                        not null
 );
-
-uindex
-    on broker (broker_id);

@@ -11,4 +11,3 @@ module PostgreSQL =
         | :? PostgresException -> ConflictException()
         | :? NpgsqlException -> BadRequestException()
         | _ -> BadRequestException exn.Message
-

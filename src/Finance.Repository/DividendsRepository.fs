@@ -20,7 +20,7 @@ module DividendsRepository =
     let getDividends connectionString : AsyncResult<List<Dividend>, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM dividends"
+        |> Sql.query "SELECT * FROM finance.dividends"
         |> Sql.executeAsync DividendDto.ofRowReader
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map DividendDto.toDomain)
@@ -28,7 +28,7 @@ module DividendsRepository =
     let getDividendsByTickerId connectionString (tickerId : TickerId) : AsyncResult<List<Dividend>, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM dividends
+        |> Sql.query "SELECT * FROM finance.dividends
                       where ticker_id = @tickerId"
         |> Sql.parameters [ "@tickerId", Sql.uuid (deconstruct tickerId) ]
         |> Sql.executeAsync DividendDto.ofRowReader
@@ -38,7 +38,7 @@ module DividendsRepository =
     let getById connectionString (id : DividendId) : AsyncResult<Dividend, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM dividends
+        |> Sql.query "SELECT * FROM finance.dividends
                       where d.dividend_id = @dividendId"
         |> Sql.parameters [ "@dividendId", Sql.uuid (deconstruct id)]
         |> Sql.executeRowAsync DividendDto.ofRowReader
@@ -57,7 +57,7 @@ module DividendsRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
-                            dividend (ticker_id, value, taxes, received_at)
+                            finance.dividend (ticker_id, value, taxes, received_at)
                             VALUES (@tickerId, @value, @taxes, @receivedAt)
                             RETURNING *"
                     |> Sql.parameters [ ("@tickerId", Sql.uuid dividendDto.TickerId)

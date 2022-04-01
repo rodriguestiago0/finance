@@ -2,18 +2,12 @@
 
 open System.IO
 open System.Security.Cryptography
-open System.Text
 
 module Encryption =
-    let private convertToArray = System.Convert.FromBase64String
-    let private convertToString = System.Convert.ToBase64String
-    let private encodingToString : byte[] -> string = Encoding.UTF8.GetString
-    let private encodingToArray : string -> byte[] = Encoding.UTF8.GetBytes
-
     let private encryptAlgorithm key =
         let aes = Aes.Create ()
         aes.KeySize <- 256
-        aes.Key <- (encodingToArray key)
+        aes.Key <- (encodingGetBytes key)
         aes
 
     let private toString (cypher, iv) =
@@ -26,15 +20,15 @@ module Encryption =
 
     let encrypt key plainText =
         let aes = encryptAlgorithm key
-        let iv = convertToString aes.IV
+        let iv = toBase64String aes.IV
         let key =
-            let bytes = encodingToArray plainText
+            let bytes = encodingGetBytes plainText
             let encryptor = aes.CreateEncryptor ()
             use buffer = new MemoryStream ()
             use stream = new CryptoStream(buffer, encryptor, CryptoStreamMode.Write)
             stream.Write(bytes, 0, bytes.Length)
             stream.FlushFinalBlock ()
-            convertToString (buffer.ToArray ())
+            toBase64String (buffer.ToArray ())
         (key, iv)
         |> toString
 
@@ -43,8 +37,8 @@ module Encryption =
         let parsedCypher = fromString cypher
 
         let mk (cypher, iv) =
-            aes.DecryptCbc(convertToArray cypher, convertToArray iv)
-            |> encodingToString
+            aes.DecryptCbc(fromBase64String cypher, fromBase64String iv)
+            |> encodingGetString
             
         parsedCypher
         |> Result.map mk

@@ -22,7 +22,7 @@ module TickersRepository =
     let getAll connectionString : AsyncResult<List<Ticker>, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM ticker"
+        |> Sql.query "SELECT * FROM finance.ticker"
         |> Sql.executeAsync TickerDto.ofRowReader
         |> AsyncResult.ofTask 
         |> AsyncResult.map (List.map TickerDto.toDomain >> Result.sequence)
@@ -33,7 +33,7 @@ module TickersRepository =
         let isin = deconstruct isin
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM ticker WHERE isin = @isin and exchange = @exchange"
+        |> Sql.query "SELECT * FROM finance.ticker WHERE isin = @isin and exchange = @exchange"
         |> Sql.parameters [ ("@isin", Sql.string isin)
                             ("@exchange", Sql.string exchange) ]
         |> Sql.executeRowAsync TickerDto.ofRowReader
@@ -44,7 +44,7 @@ module TickersRepository =
     let getById connectionString (id : TickerId) : AsyncResult<Ticker, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM ticker
+        |> Sql.query "SELECT * FROM finance.ticker
                       WHERE ticker_id = @tickerId"
         |> Sql.parameters [ "@tickerId", Sql.uuid (deconstruct id) ]
         |> Sql.executeRowAsync TickerDto.ofRowReader
@@ -63,7 +63,7 @@ module TickersRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
-                                  ticker (short_id, ticker_type, isin, name, exchange, currency)
+                                  finance.ticker (short_id, ticker_type, isin, name, exchange, currency)
                                   VALUES (@shortId, @tickerType, @isin, @name, @exchange, @currency)
                                   RETURNING *"
                     |> Sql.parameters [ ("@shortId", Sql.string tickerDto.ShortId)

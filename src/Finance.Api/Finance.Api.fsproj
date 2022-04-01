@@ -16,11 +16,13 @@
     <Compile Include="Models\Ticker.fs" />
     <Compile Include="Models\Broker.fs" />
     <Compile Include="Models\Dividends.fs" />
+    <Compile Include="Models\Login.fs" />
     <Compile Include="Endpoints\TickerEndpoints.fs" />
     <Compile Include="Endpoints\DividendEndpoints.fs" />
     <Compile Include="Endpoints\BrokerEndpoints.fs" />
     <Compile Include="Endpoints\TransactionEndpoints.fs" />
     <Compile Include="Endpoints\BankEndpoints.fs" />
+    <Compile Include="Endpoints\AuthenticationEndpoints.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

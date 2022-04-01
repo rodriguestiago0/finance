@@ -1,12 +1,13 @@
 ﻿namespace Finance.Api
 
+open System
 open System.Threading.Tasks
 open Microsoft.AspNetCore.Http
 open Finance.FSharp
 
 module ApiBinder =
 
-    type FormFiles =
+    type public FormFiles =
         { Items : seq<IFormFile> }
         with
         static member BindAsync (context : HttpContext) =
@@ -38,5 +39,35 @@ module ApiBinder =
 
             match result with
             | Ok f ->
-                ValueTask.FromResult<FormFiles>(f)
-            | Error e -> failwith e.Message
+                ValueTask.FromResult(f)
+            | Error _ ->
+                ValueTask.FromResult(Unchecked.defaultof<FormFiles>)
+
+    type public Pagination =
+        { Page : Option<int>
+          PageSize : Option<int> }
+        with
+        static member BindAsync (context : HttpContext) =
+            let pageSizeKey = "pageSize";
+            let pageKey = "page";
+
+            let page =
+                match context.Request.Query.ContainsKey pageKey, Int32.TryParse context.Request.Query[pageKey] with
+                | true, (true, p) -> Ok (Some p)
+                | false, _ -> Ok(None)
+                | true, (false, _) -> "Cannot parse Page" |> exn |> Error
+
+            let pageSize =
+                match context.Request.Query.ContainsKey pageSizeKey, Int32.TryParse context.Request.Query[pageSizeKey] with
+                | true, (true, p) -> Ok (Some p)
+                | false, _ -> Ok(None)
+                | true, (false, _) -> "Cannot parse Page Size" |> exn |> Error
+
+            match page, pageSize with
+            | Ok p, Ok ps ->
+                let result =
+                    { Pagination.Page = p
+                      PageSize = ps }
+                ValueTask.FromResult(result)
+            | _ ->
+                failwith ""

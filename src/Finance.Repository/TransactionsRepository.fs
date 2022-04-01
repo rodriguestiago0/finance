@@ -25,7 +25,7 @@ module TransactionsRepository =
     let getByBrokerExternalId connectionString (brokerId : BrokerId) : AsyncResult<List<Transaction>, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM transaction
+        |> Sql.query "SELECT * FROM finance.transaction
                       WHERE broker_id = @brokerId"
         |> Sql.parameters [ "@brokerId", Sql.uuid (deconstruct brokerId) ]
         |> Sql.executeAsync TransactionDto.ofRowReader
@@ -36,7 +36,7 @@ module TransactionsRepository =
     let getByTickerId connectionString (tickerId : TickerId) : AsyncResult<List<Transaction>, exn> =
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM transaction
+        |> Sql.query "SELECT * FROM finance.transaction
                       WHERE ticker_id = @tickerId"
         |> Sql.parameters [ "@tickerId", Sql.uuid (deconstruct tickerId) ]
         |> Sql.executeAsync TransactionDto.ofRowReader
@@ -51,8 +51,8 @@ module TransactionsRepository =
                                 (SELECT
                                         t.*,
                                         sum(ct.Units) as total
-                                FROM transaction t
-                                FULL JOIN closed_transaction ct on ct.buy_transaction_id = t.transaction_id or ct.sell_transaction_id = t.transaction_id
+                                FROM finance.transaction t
+                                FULL JOIN finance.closed_transaction ct on ct.buy_transaction_id = t.transaction_id or ct.sell_transaction_id = t.transaction_id
                                 where ti.ticker_id = @tickerId
                                 group by t.transaction_id)
                             select
@@ -106,7 +106,7 @@ module TransactionsRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.executeTransactionAsync [ "INSERT INTO
-                            Transaction (broker_transaction_id, ticker_id, date, units, price, local_price, fee, exchange_rate, broker_id, note)
+                            finance.transaction (broker_transaction_id, ticker_id, date, units, price, local_price, fee, exchange_rate, broker_id, note)
                             VALUES (@brokerTransactionId, @tickerId, @date, @units, @price, @localPrice, @fee, @exchangeRate, @brokerId, @note)", data]
                     |> Async.AwaitTask
                 return Ok (List.sum result)

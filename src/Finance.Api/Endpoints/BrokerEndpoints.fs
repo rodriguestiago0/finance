@@ -46,8 +46,8 @@ module Broker =
     let registerEndpoint (app : WebApplication) (brokerContext : BrokerContext) =
     
         app.MapPost("/api/brokers", Func<BrokerDto,Task<IResult>>(createBroker brokerContext))
-           .WithTags("Brokers") |> ignore
+            .WithTags("Brokers") |> ignore
         app.MapGet("/api/brokers", Func<Task<IResult>>(getBrokers brokerContext))
-           .WithTags("Brokers") |> ignore
+            .WithTags("Brokers") |> ignore
         app.MapGet("/api/brokers/{id}", Func<Guid, Task<IResult>> (fun (id :Guid) -> getBroker brokerContext id))
-           .WithTags("Brokers") |> ignore
+            .WithTags("Brokers") |> ignore

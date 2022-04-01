@@ -1,4 +1,6 @@
-﻿namespace Finance.Model.Investment
+﻿namespace Finance.Model
+
+open System
 
 type Username =
     Username of string
@@ -7,6 +9,14 @@ type Username =
             let (Username username) = this
             username
 
+type UserId =
+    UserId of Guid
+    with
+        member this.Deconstruct() =
+            let (UserId id) = this
+            id
+
 type User =
-    { Username : Username
+    { UserId : UserId
+      Username : Username
       Password : string }

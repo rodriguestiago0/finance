@@ -1,4 +1,4 @@
-create table if not exists transaction
+create table if not exists finance.transaction
 (
     transaction_id        uuid default gen_random_uuid() not null
         constraint transaction_pk
@@ -6,7 +6,7 @@ create table if not exists transaction
     broker_transaction_id varchar,
     ticker_id             uuid                           not null
         constraint transaction_ticker_ticker_id_fk
-            references ticker
+            references finance.ticker
             on delete cascade,
     date                  timestamp with time zone       not null,
     units                 numeric                        not null,
@@ -16,13 +16,10 @@ create table if not exists transaction
     exchange_rate         numeric,
     broker_id             uuid                           not null
         constraint transaction_broker_broker_id_fk
-            references broker
+            references finance.broker
             on delete cascade,
     note                  varchar
 );
 
 create unique index if not exists transaction_broker_transaction_id_broker_uindex
-    on transaction (broker_transaction_id, broker_id);
-
-on_id, broker_id);
-
+    on finance.transaction (broker_transaction_id, broker_id);

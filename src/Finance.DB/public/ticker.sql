@@ -1,4 +1,4 @@
-create table if not exists ticker
+create table if not exists finance.ticker
 (
     ticker_id   uuid default gen_random_uuid() not null
         constraint ticker_pk
@@ -12,14 +12,8 @@ create table if not exists ticker
 );
 
 create unique index if not exists ticker_ticker_id_uindex
-    on ticker (ticker_id);
+    on finance.ticker (ticker_id);
 
 create unique index if not exists ticker_isin_uindex
-    on ticker (isin);
-
-
-    on ticker (ticker_id);
-
-create unique index if not exists ticker_isin_uindex
-    on ticker (isin);
+    on finance.ticker (isin);
 

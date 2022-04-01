@@ -17,6 +17,8 @@
     <Compile Include="BankTransaction\BankTransactionContext.fs" />
     <Compile Include="BankTransaction\ApiBankTransactionContext.fs" />
     <Compile Include="BankTransaction\BankTransactionService.fs" />
+    <Compile Include="Authentication\AuthenticationService.fs" />
+    <Compile Include="Authentication\AuthenticationContext.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Finance.FSharp\Finance.FSharp.fsproj" />

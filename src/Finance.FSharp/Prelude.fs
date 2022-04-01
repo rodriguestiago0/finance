@@ -1,6 +1,7 @@
 ﻿namespace Finance.FSharp
 
 open System
+open System.Text
 
 [<AutoOpen>]
 module Guid = 
@@ -40,6 +41,18 @@ module TypeIds =
     let inline idToString x = deconstruct x |> string
 
     let inline idToStringOption x = deconstructOption x |> Option.map string
+
+    let inline fromBase64String str =
+        Convert.FromBase64String(str)
+
+    let inline toBase64String b =
+        Convert.ToBase64String(b)
+
+    let inline encodingGetString (b : byte[]) =
+        Encoding.UTF8.GetString(b)
+
+    let inline encodingGetBytes (str : string) =
+        Encoding.UTF8.GetBytes(str)
 
 [<AutoOpen>]
 module Strings =

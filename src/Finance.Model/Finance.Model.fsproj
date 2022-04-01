@@ -7,6 +7,7 @@
 
     <ItemGroup>
       <Compile Include="Currency.fs" />
+      <Compile Include="User.fs" />
       <Compile Include="Investment\Ticker.fs" />
       <Compile Include="Investment\Broker.fs" />
       <Compile Include="Investment\Transaction.fs" />
