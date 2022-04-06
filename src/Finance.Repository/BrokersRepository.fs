@@ -13,15 +13,18 @@ module BrokersRepository =
         static member ofRowReader (read : RowReader) =
             { BrokerDto.BrokerId = read.uuid "broker_id"
               Name = read.string "name"
-              CountryId = read.int "country_id" }
-    
+              CountryId = read.int "country_id"
+              FileImporter = read.intOrNone "file_importer" }
+
     let getBrokers connectionString : AsyncResult<List<Broker>, exn> =
         connectionString
         |> Sql.connect
         |> Sql.query "SELECT * FROM finance.broker"
         |> Sql.executeAsync BrokerDto.ofRowReader
-        |> AsyncResult.ofTask 
-        |> AsyncResult.map (List.map BrokerDto.toDomain)
+        |> AsyncResult.ofTask
+        |> AsyncResult.map (List.map BrokerDto.toDomain >> Result.sequence)
+        |> Async.map Result.flatten
+        |> AsyncResult.map List.ofSeq
         
     let getByName connectionString (name : string) : AsyncResult<Broker, exn> =
         connectionString
@@ -30,7 +33,7 @@ module BrokersRepository =
         |> Sql.parameters [ "@name", Sql.string name]
         |> Sql.executeRowAsync BrokerDto.ofRowReader
         |> AsyncResult.ofTask 
-        |> AsyncResult.map BrokerDto.toDomain
+        |> Async.map (Result.bind BrokerDto.toDomain)
         |> AsyncResult.mapError handleExceptions
         
     let getById connectionString (id : BrokerId) : AsyncResult<Broker, exn> =
@@ -40,7 +43,7 @@ module BrokersRepository =
         |> Sql.parameters [ "@brokerId", Sql.uuid (deconstruct id)]
         |> Sql.executeRowAsync BrokerDto.ofRowReader
         |> AsyncResult.ofTask
-        |> AsyncResult.map BrokerDto.toDomain
+        |> Async.map (Result.bind BrokerDto.toDomain)
         |> AsyncResult.mapError handleExceptions
     
     let createBroker connectionString (broker : Broker) : AsyncResult<Broker, exn> =
@@ -54,14 +57,15 @@ module BrokersRepository =
                     connectionString
                     |> Sql.connect
                     |> Sql.query "INSERT INTO
-                            finance.broker (name, country_id)
-                            VALUES (@name, @countryId)
+                            finance.broker (name, country_id, file_importer)
+                            VALUES (@name, @countryId, @fileImporter)
                             RETURNING *"
                     |> Sql.parameters [ ("@name", Sql.string brokerDto.Name)
-                                        ("@countryId", Sql.int brokerDto.CountryId)]
+                                        ("@countryId", Sql.int brokerDto.CountryId)
+                                        ("@fileImporter", Sql.intOrNone brokerDto.FileImporter)]
                     |> Sql.executeRowAsync BrokerDto.ofRowReader
                     |> AsyncResult.ofTask
-                    |> AsyncResult.map BrokerDto.toDomain
+                    |> Async.map (Result.bind BrokerDto.toDomain)
             with ex ->
                 return Error ex
         }

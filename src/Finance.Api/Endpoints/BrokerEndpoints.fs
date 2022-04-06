@@ -1,14 +1,15 @@
 ﻿namespace Finance.Api.Endpoints
 
 open System
+open System.Net
 open System.Threading.Tasks
 open FSharp.Core
-open Finance.FSharp
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
 open Finance.Api.Helpers
 open Finance.Api.Models
 open Finance.Application.Broker
+open Finance.FSharp
 open Finance.Model.Investment
 
 [<RequireQualifiedAccess>]
@@ -20,8 +21,10 @@ module Broker =
             let buildUri (broker : BrokerDto) =
                 $"/brokers/{broker.BrokerId}"
                 
-            return! 
-                brokerContext.SaveBroker ticker
+            return!
+                ticker
+                |> Async.retn
+                |> AsyncResult.bind brokerContext.SaveBroker
                 |> AsyncResult.map BrokerDto.ofDomain 
                 |> IResults.created buildUri
         }
@@ -43,11 +46,12 @@ module Broker =
                 |> IResults.ok
         }
 
-    let registerEndpoint (app : WebApplication) (brokerContext : BrokerContext) =
+    let registerEndpoint (brokerContext : BrokerContext) (app : WebApplication) =
     
         app.MapPost("/api/brokers", Func<BrokerDto,Task<IResult>>(createBroker brokerContext))
             .WithTags("Brokers") |> ignore
         app.MapGet("/api/brokers", Func<Task<IResult>>(getBrokers brokerContext))
             .WithTags("Brokers") |> ignore
-        app.MapGet("/api/brokers/{id}", Func<Guid, Task<IResult>> (fun (id :Guid) -> getBroker brokerContext id))
+        app.MapGet("/api/brokers/{id}", Func<Guid, Task<IResult>> (fun id -> getBroker brokerContext id))
             .WithTags("Brokers") |> ignore
+        app

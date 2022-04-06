@@ -1,14 +1,14 @@
-﻿namespace Finance.Application.Degiro
+﻿namespace Finance.Application.FileImporter
 
 open Finance.FSharp
 open Finance.Model.Investment
 open Finance.Repository
 
-type FetchTicker = ISIN -> string -> AsyncResult<Ticker, exn>
+type FetchTicker = ISIN -> AsyncResult<Ticker, exn>
 type FetchBroker =  BrokerId -> AsyncResult<Broker, exn>
 type SaveTransactions = seq<Transaction> -> AsyncResult<int, exn>
 
-type DegiroContext =
+type FileImporterContext =
     { FetchTicker : FetchTicker
       FetchBroker : FetchBroker
       SaveTransactions : SaveTransactions }
@@ -16,7 +16,7 @@ with
     static member create sqlConnectionString =
             
         let fetchTicker =
-            TickersRepository.getByISINAndExchange sqlConnectionString
+            TickersRepository.getByISIN sqlConnectionString
             
         let fetchBroker =
            BrokersRepository.getById sqlConnectionString

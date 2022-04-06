@@ -3,12 +3,12 @@
 open System
 open System.Threading.Tasks
 open FSharp.Core
-open Finance.FSharp
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
-open Finance.Api.Helpers
 open Finance.Api.Models
+open Finance.Api.Helpers
 open Finance.Application.Dividend
+open Finance.FSharp
 open Finance.Model.Investment
 
 [<RequireQualifiedAccess>]
@@ -43,10 +43,11 @@ module Dividend =
                 |> IResults.ok
         }
         
-    let registerEndpoint (app : WebApplication) (dividendContext : DividendContext) =
+    let registerEndpoint (dividendContext : DividendContext) (app : WebApplication) =
         app.MapPost("/api/tickers/{tickerId}/dividends", Func<Guid, DividendDto, Task<IResult>>(fun tickerId dto -> createDividends dividendContext tickerId dto))
             .WithTags("Tickers") |> ignore
         app.MapGet("/api/tickers/{tickerId}/dividends", Func<Guid, Task<IResult>>(fun tickerId -> getDividendsByTicketId dividendContext tickerId))
             .WithTags("Tickers") |> ignore
         app.MapGet("/api/dividends/{dividendId}", Func<Guid, Task<IResult>>(fun dividendId -> getDividendsById dividendContext dividendId ))
             .WithTags("Tickers") |> ignore
+        app

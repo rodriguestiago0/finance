@@ -6,7 +6,7 @@ open FSharp.Core
 open Finance.Api.ApiBinder
 open Finance.Api.Helpers
 open Finance.Api.Models
-open Finance.Application.Degiro
+open Finance.Application.FileImporter
 open Finance.Application.Transaction
 open Finance.FSharp
 open Finance.Model.Investment
@@ -25,27 +25,43 @@ module Transaction =
                 |> IResults.ok
         }
         
-    let private uploadFile (degiroContext : DegiroContext) (externalBrokerId : Guid) (formFiles : FormFiles) : Task<IResult> =
+    let private uploadFile (fileImporterContext : FileImporterContext) (externalBrokerId : Guid) (formFiles : FormFiles) : Task<IResult> =
         task{
-                let processForms (forms : seq<IFormFile>) =
-                    forms
-                    |> Seq.map(fun form ->
-                        use stream = form.OpenReadStream()
-                        stream
-                        |> Degiro.importCSV degiroContext externalBrokerId)
-                    |> AsyncResult.sequence
+                let broker =
+                    fileImporterContext.FetchBroker (externalBrokerId |> BrokerId)
+
+                let processForms (forms : seq<IFormFile>) (broker : Broker) =
+                    let mkImport fileImporter =
+                        match fileImporter with
+                        | Degiro ->
+                            Degiro.importCSV fileImporterContext broker
+                        | Revolut ->
+                            Revolut.importCSV fileImporterContext broker
+
+                    let import fileImporter =
+                        forms
+                        |> Seq.map(fun form ->
+                            form.OpenReadStream()
+                            |> mkImport fileImporter)
+                        |> AsyncResult.sequence
+
+                    broker.FileImporter
+                    |> Option.map import
+                    |> Option.defaultValue ("No File Importer specified" |> exn |> AsyncResult.error)
 
                 return!
-                    processForms formFiles.Items
+                    broker
+                    |> AsyncResult.bind (processForms formFiles.Items)
                     |> IResults.ok
         }
 
 
     
-    let registerEndpoint (app : WebApplication) (transactionContext : ApiTransactionContext) (degiroContext : DegiroContext) =
+    let registerEndpoint (transactionContext : ApiTransactionContext) (degiroContext : FileImporterContext) (app : WebApplication) =
 
         app.MapPost("/api/brokers/{id}/transactions", Func<Guid,FormFiles,Task<IResult>> (fun id formFiles -> uploadFile degiroContext id formFiles))
             .Accepts<IFormFile>("multipart/form-data")
             .WithTags("Transactions") |> ignore
         app.MapGet("/api/brokers/{id}/transactions", Func<Guid,Task<IResult>>(fun id -> getTransactionByBrokerId transactionContext id))
             .WithTags("Transactions") |> ignore
+        app

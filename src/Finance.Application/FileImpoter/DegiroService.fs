@@ -1,10 +1,10 @@
-﻿namespace Finance.Application.Degiro
+﻿namespace Finance.Application.FileImporter
 
 open System
 open System.Globalization
 open System.IO
 open FSharpPlus
-open Finance.Application.Degiro
+open Finance.Application.FileImporter
 open Finance.FSharp
 open Finance.FSharp.AsyncResult.Operators
 open Finance.Model.Investment
@@ -13,7 +13,6 @@ open Finance.Model.Investment
 module Degiro =
     type private DegiroTransaction =
         { ISIN : ISIN
-          Exchange : string
           BrokerTransactionId : string
           Date : DateTimeOffset
           Units : decimal
@@ -22,7 +21,7 @@ module Degiro =
           Fee : Option<decimal>
           ExchangeRate : Option<decimal> }
 
-    let importCSV (context : DegiroContext) (brokerId : Guid) (stream : Stream) =
+    let importCSV (context : FileImporterContext) (broker : Broker) (stream : Stream) =
         let readLines (stream : Stream) = seq {
             use sr = new StreamReader (stream)
             let _ = sr.ReadLine ()
@@ -35,14 +34,13 @@ module Degiro =
                 None
             else
                 match parts with
-                | [| date; hour; _; isin; exchange; _; IsDecimal units; IsDecimal price; _; _; _; _; _ ; IsDecimalOptional exchangeRate; IsDecimalOptional fee; _; _; _; brokerTransactionId |] ->
+                | [| date; hour; _; isin; _; _; IsDecimal units; IsDecimal price; _; _; _; _; _ ; IsDecimalOptional exchangeRate; IsDecimalOptional fee; _; _; _; brokerTransactionId |] ->
                     
                     let date = DateTimeOffset.ParseExact($"{date} {hour}", "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
                     let localPrice =
                         exchangeRate
                         |> Option.map (fun exchangeRate -> price/exchangeRate)
                     { DegiroTransaction.ISIN = isin |> ISIN
-                      Exchange = exchange
                       BrokerTransactionId = brokerTransactionId
                       Date = date
                       Units = units
@@ -61,7 +59,7 @@ module Degiro =
 
         let convertTransaction (broker : Broker) (transaction : DegiroTransaction) =
             let ticker =
-                context.FetchTicker transaction.ISIN transaction.Exchange
+                context.FetchTicker transaction.ISIN
 
             let mk (ticker : Ticker) =
                 { Transaction.TransactionId = TransactionId.empty
@@ -96,7 +94,7 @@ module Degiro =
                 |> Seq.fold mergeTransactions first)
 
         
-        let parser (broker, lines) =
+        let parser broker lines =
             let parseDegiroTransaction degiroTransactions =
                 degiroTransactions
                 |> Seq.map (convertTransaction broker)
@@ -107,18 +105,12 @@ module Degiro =
             |> AsyncResult.sequence
             |> AsyncResult.map groupByExternalTransactionId
             |> AsyncResult.bind parseDegiroTransaction
-        
-        let broker =
-           context.FetchBroker (brokerId |> BrokerId)
-        
+
         let lines =
             readLines stream
             |> Seq.map (split ",")
             |> AsyncResult.retn
-            
-        let linesBroker = AsyncResult.lift2 tuple2 broker lines
 
-        linesBroker
-        |> AsyncResult.bind parser
+        lines
+        |> AsyncResult.bind (parser broker)
         |> AsyncResult.bind context.SaveTransactions
-        |> AsyncResult.teeError(fun e -> Console.WriteLine e)

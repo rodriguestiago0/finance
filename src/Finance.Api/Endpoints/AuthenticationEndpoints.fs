@@ -39,7 +39,8 @@ module Authentication =
                         expires = expires,
                         notBefore = notBefore,
                         signingCredentials = signingCredentials)
-                JwtSecurityTokenHandler().WriteToken(token)
+                { AuthenticationDto.Token = JwtSecurityTokenHandler().WriteToken(token)
+                  ExpirationDate = expires |> Option.ofNullable }
 
             return!
                 authenticationContext.Authenticate (login.Username |> Username) login.Password
@@ -47,7 +48,8 @@ module Authentication =
                 |> IResults.ok
         }
 
-    let registerEndpoint (app : WebApplication) (authenticationContext : AuthenticationContext) =
+    let registerEndpoint (authenticationContext : AuthenticationContext) (app : WebApplication) =
         app.MapPost("/api/login", Func<LoginDto, Task<IResult>>(fun login -> authenticate authenticationContext login))
             .AllowAnonymous()
             .WithTags("Authentication") |> ignore
+        app

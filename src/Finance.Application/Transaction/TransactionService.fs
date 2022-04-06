@@ -1,9 +1,7 @@
 ﻿namespace Finance.Application.Transaction
 
 open System
-open FSharpPlus
 open Finance.FSharp
-open Finance.FSharp.AsyncResult.Operators
 open Finance.Model.Investment
 open Microsoft.Extensions.Logging
 
@@ -69,8 +67,8 @@ module Transaction =
                         sell :: sellTransactions.Tail
 
                 loop closedTransactions (sellTransactions, buyTransactions)
-        loop []
-        <!> transactions
+        transactions
+        |> AsyncResult.map (loop [])
         |> AsyncResult.bind context.SaveClosedTransactions
         |> AsyncResult.tee(fun _ -> context.Log.LogInformation $"Done calculating close transaction for Ticket {deconstruct ticker.TickerId}")
         |> AsyncResult.teeError(fun e -> context.Log.LogInformation $"Failed calculating close transaction for Ticket {deconstruct ticker.TickerId} - {e.Message}")

@@ -3,12 +3,13 @@
 open System
 open System.Threading.Tasks
 open FSharp.Core
-open Finance.FSharp
+open Finance.Application.Transaction
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
 open Finance.Api.Helpers
 open Finance.Api.Models
 open Finance.Application.Ticker
+open Finance.FSharp
 open Finance.Model.Investment
 
 [<RequireQualifiedAccess>]
@@ -46,21 +47,22 @@ module Ticker =
                 |> IResults.ok
         }
 
-    let private createDividends (tickerContext : TickerContext) (id : Guid) (dto : DividendDto) =
+    let private getClosedTransactions (transactionContext : ApiTransactionContext) (id : Guid) =
         task{
             return!
                 TickerId id
-                |> tickerContext.FetchTickerById
-                |> AsyncResult.map TickerDto.ofDomain
+                |> transactionContext.FetchClosedTransactionsByTicker
+                |> AsyncResult.map (List.map CloseTransactionDto.ofDomain)
                 |> IResults.ok
         }
-        
-    let registerEndpoint (app : WebApplication) (tickerContext : TickerContext) =
+
+    let registerEndpoint (tickerContext : TickerContext) (transactionContext : ApiTransactionContext)  (app : WebApplication) =
         app.MapPost("/api/tickers", Func<TickerDto,Task<IResult>>(createTicker tickerContext))
             .WithTags("Tickers") |> ignore
         app.MapGet("/api/tickers", Func<Task<IResult>>(getTickers tickerContext))
             .WithTags("Tickers") |> ignore
         app.MapGet("/api/tickers/{id}", Func<Guid, Task<IResult>>(fun id -> getById tickerContext id))
             .WithTags("Tickers") |> ignore
-        app.MapPost("/api/tickers/{id}/dividends", Func<Guid, DividendDto, Task<IResult>>(fun id dto -> createDividends tickerContext id dto))
+        app.MapGet("/api/tickers/{id}/closedTransactions", Func<Guid, Task<IResult>>(fun id -> getClosedTransactions transactionContext id))
             .WithTags("Tickers") |> ignore
+        app

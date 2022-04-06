@@ -6,7 +6,6 @@ type ValidationResult<'TSuccess, 'TFailure> =
     | Success of 'TSuccess
     | Failure of 'TFailure
 
-
 [<RequireQualifiedAccess>]
 module ValidationResult =
     let retn x = Success x
@@ -48,10 +47,6 @@ module ValidationResult =
         Seq.foldBack folder xs (Success Seq.empty)
 
     let sequence xs = traverse id xs
-
-module Operators =
-    let (<!>) = ValidationResult.map
-    let (<*>) = ValidationResult.apply
 
 
 [<AutoOpen>]

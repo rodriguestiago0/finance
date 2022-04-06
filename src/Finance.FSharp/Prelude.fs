@@ -33,6 +33,25 @@ module Arrays =
         | l -> Array.skip (l - n) array
 
 [<AutoOpen>]
+module DiscriminatedUnion =
+    open Microsoft.FSharp.Reflection
+
+    let inline fromString<'a> (s:string) =
+        match FSharpType.GetUnionCases typeof<'a> |> Array.filter (fun case -> case.Name = s) with
+        | [|case|] -> Ok (FSharpValue.MakeUnion(case,[||]) :?> 'a)
+        | _ -> sprintf "Unexpected Enumerator value %s" s
+               |> exn
+               |> Error
+
+    let getAsString (x:'a) =
+        match FSharpValue.GetUnionFields(x, typeof<'a>) with
+        | _, value -> Seq.head value |> string
+
+    let getCaseName (x:'a) =
+        match FSharpValue.GetUnionFields(x, typeof<'a>) with
+        | case, _ -> case.Name
+
+[<AutoOpen>]
 module TypeIds =
     let inline deconstruct x = (^a: (member Deconstruct: unit -> ^b) x)
     

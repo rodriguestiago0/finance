@@ -15,4 +15,5 @@ type BrokerId =
 type Broker =
     { BrokerId : BrokerId
       Name : string
-      CountryId : int }
+      CountryId : int
+      FileImporter : Option<FileImporter> }

@@ -29,13 +29,12 @@ module TickersRepository =
         |> Async.map Result.flatten
         |> AsyncResult.map List.ofSeq
 
-    let getByISINAndExchange connectionString (isin : ISIN) (exchange : string) : AsyncResult<Ticker, exn> =
+    let getByISIN connectionString (isin : ISIN)  : AsyncResult<Ticker, exn> =
         let isin = deconstruct isin
         connectionString
         |> Sql.connect
-        |> Sql.query "SELECT * FROM finance.ticker WHERE isin = @isin and exchange = @exchange"
-        |> Sql.parameters [ ("@isin", Sql.string isin)
-                            ("@exchange", Sql.string exchange) ]
+        |> Sql.query "SELECT * FROM finance.ticker WHERE isin = @isin"
+        |> Sql.parameters [ ("@isin", Sql.string isin)]
         |> Sql.executeRowAsync TickerDto.ofRowReader
         |> AsyncResult.ofTask 
         |> Async.map (Result.bind TickerDto.toDomain)

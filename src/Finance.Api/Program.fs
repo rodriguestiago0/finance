@@ -3,7 +3,7 @@ open Finance.Api.Endpoints
 open Finance.Api.Settings
 open Finance.Application.Authentication
 open Finance.Application.Broker
-open Finance.Application.Degiro
+open Finance.Application.FileImporter
 open Finance.Application.Dividend
 open Finance.Application.Ticker
 open Finance.Application.Transaction
@@ -35,7 +35,7 @@ let main args =
     let configurationBuilder = ConfigurationBuilder() |> configureSettings
     let settings = configurationBuilder.Build().Get<Settings>()
 
-    let degiroContext = DegiroContext.create settings.SqlConnectionString
+    let degiroContext = FileImporterContext.create settings.SqlConnectionString
     let dividendContext = DividendContext.Create settings.SqlConnectionString
     let tickerContext = TickerContext.create settings.SqlConnectionString
     let brokerContext = BrokerContext.create settings.SqlConnectionString
@@ -141,12 +141,14 @@ let main args =
        .UseAuthentication()
        .UseAuthorization() |> ignore
 
-    Authentication.registerEndpoint app authenticationContext
-    Ticker.registerEndpoint app tickerContext
-    Broker.registerEndpoint app brokerContext
-    Transaction.registerEndpoint app transactionContext degiroContext
-    Dividend.registerEndpoint app dividendContext
-    Bank.registerEndpoint app bankContext
+    app
+    |> Authentication.registerEndpoint authenticationContext
+    |> Ticker.registerEndpoint tickerContext transactionContext
+    |> Broker.registerEndpoint brokerContext
+    |> Transaction.registerEndpoint transactionContext degiroContext
+    |> Dividend.registerEndpoint dividendContext
+    //|> Bank.registerEndpoint bankContext
+    |> ignore
 
     let log = app.Logger
 
