@@ -143,7 +143,7 @@ let main args =
 
     app
     |> Authentication.registerEndpoint authenticationContext
-    |> Ticker.registerEndpoint tickerContext transactionContext
+    |> Ticker.registerEndpoint tickerContext
     |> Broker.registerEndpoint brokerContext
     |> Transaction.registerEndpoint transactionContext degiroContext
     |> Dividend.registerEndpoint dividendContext

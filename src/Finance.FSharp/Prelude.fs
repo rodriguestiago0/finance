@@ -61,6 +61,8 @@ module TypeIds =
 
     let inline idToStringOption x = deconstructOption x |> Option.map string
 
+[<AutoOpen>]
+module Encodings =
     let inline fromBase64String str =
         Convert.FromBase64String(str)
 
@@ -106,7 +108,7 @@ module Strings =
         str |> int
 
 [<AutoOpen>]
-module Decimal =
+module Decimals =
     let (|IsDecimal|_|) (str : string) =
         match Decimal.TryParse(str) with
         | true, d -> Some d
@@ -139,6 +141,11 @@ module DateTimes =
     let inline mkDateTimeOffset date =
         date
         |> (mkUtcWhenNoKind >> DateTimeOffset)
+
+[<AutoOpen>]
+module DatesOnly =
+    let inline toDateTime time (value : DateOnly) =
+       value.ToDateTime(time)
 
 [<AutoOpen>]
 module Exceptions =

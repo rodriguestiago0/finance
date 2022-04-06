@@ -55,7 +55,13 @@ module Transaction =
                     |> IResults.ok
         }
 
-
+    let private getClosedTransactions (transactionContext : ApiTransactionContext) (id : Guid) (startAt : Option<DateOnly>) (endAt : Option<DateOnly>) =
+        task{
+            return!
+                transactionContext.FetchClosedTransactionsByTicker (TickerId id) startAt endAt
+                |> AsyncResult.map (List.map CloseTransactionDto.ofDomain)
+                |> IResults.ok
+        }
     
     let registerEndpoint (transactionContext : ApiTransactionContext) (degiroContext : FileImporterContext) (app : WebApplication) =
 
@@ -64,4 +70,6 @@ module Transaction =
             .WithTags("Transactions") |> ignore
         app.MapGet("/api/brokers/{id}/transactions", Func<Guid,Task<IResult>>(fun id -> getTransactionByBrokerId transactionContext id))
             .WithTags("Transactions") |> ignore
+        app.MapGet("/api/tickers/{id}/closedTransactions", Func<Guid, Nullable<DateOnly>, Nullable<DateOnly>, Task<IResult>>(fun id startAt endAt -> getClosedTransactions transactionContext id (startAt |> Option.ofNullable) (endAt |> Option.ofNullable)))
+            .WithTags("Close Transactions") |> ignore
         app

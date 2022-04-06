@@ -1,12 +1,12 @@
 ﻿namespace Finance.Application.Transaction
 
+open System
 open Finance.FSharp
 open Finance.Model.Investment
 open Finance.Repository
 
 type FetchTransactionByBrokerId = BrokerId -> AsyncResult<List<Transaction>, exn>
-type FetchClosedTransactionsByTicker = TickerId -> AsyncResult<List<CloseTransaction>, exn>
-
+type FetchClosedTransactionsByTicker = TickerId -> Option<DateOnly> -> Option<DateOnly> -> AsyncResult<List<CloseTransaction>, exn>
 
 type ApiTransactionContext =
     { FetchTransactionByBrokerId : FetchTransactionByBrokerId

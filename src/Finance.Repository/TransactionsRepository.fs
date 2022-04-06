@@ -22,7 +22,7 @@ module TransactionsRepository =
               BrokerId = read.uuid "broker_id"
               Note = read.stringOrNone "note" }
 
-    let getByBrokerExternalId connectionString (brokerId : BrokerId) : AsyncResult<List<Transaction>, exn> =
+    let getByBrokerExternalId connectionString (brokerId : BrokerId)  : AsyncResult<List<Transaction>, exn> =
         connectionString
         |> Sql.connect
         |> Sql.query "SELECT * FROM finance.transaction

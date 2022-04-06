@@ -84,7 +84,7 @@ module Degiro =
                 let mergeTransactions (t1 : DegiroTransaction) (t2 : DegiroTransaction) =
                     { t1 with
                         Units = t1.Units + t2.Units
-                        Fee = Decimal.addOptional t1.Fee t2.Fee }
+                        Fee = addOptional t1.Fee t2.Fee }
                 let first =
                     transactions
                     |> Seq.head

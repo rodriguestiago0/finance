@@ -47,22 +47,11 @@ module Ticker =
                 |> IResults.ok
         }
 
-    let private getClosedTransactions (transactionContext : ApiTransactionContext) (id : Guid) =
-        task{
-            return!
-                TickerId id
-                |> transactionContext.FetchClosedTransactionsByTicker
-                |> AsyncResult.map (List.map CloseTransactionDto.ofDomain)
-                |> IResults.ok
-        }
-
-    let registerEndpoint (tickerContext : TickerContext) (transactionContext : ApiTransactionContext)  (app : WebApplication) =
+    let registerEndpoint (tickerContext : TickerContext)  (app : WebApplication) =
         app.MapPost("/api/tickers", Func<TickerDto,Task<IResult>>(createTicker tickerContext))
             .WithTags("Tickers") |> ignore
         app.MapGet("/api/tickers", Func<Task<IResult>>(getTickers tickerContext))
             .WithTags("Tickers") |> ignore
         app.MapGet("/api/tickers/{id}", Func<Guid, Task<IResult>>(fun id -> getById tickerContext id))
-            .WithTags("Tickers") |> ignore
-        app.MapGet("/api/tickers/{id}/closedTransactions", Func<Guid, Task<IResult>>(fun id -> getClosedTransactions transactionContext id))
             .WithTags("Tickers") |> ignore
         app
